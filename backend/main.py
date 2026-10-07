@@ -71,7 +71,7 @@ def run_startup_checks():
 
     print_info("Creating database tables...")
     from database import engine, Base
-    from models import User, Settings, ActivityLog, TicketBooking, VisaProcessing, CashOut, Agent
+    from models import User, Settings, ActivityLog, TicketBooking, VisaProcessing, CashOut, Agent, Expense
     try:
         Base.metadata.create_all(bind=engine)
         print_ok("Tables ready")
@@ -143,7 +143,7 @@ from auth import (
     get_password_hash, verify_password, create_access_token,
     create_refresh_token, decode_token, get_current_user, SECRET_KEY
 )
-from routers import agents, tickets, visas, cashouts, settings, dashboard, backup, export, alerts, activity, payments
+from routers import agents, tickets, visas, cashouts, settings, dashboard, backup, export, alerts, activity, payments, expenses
 from schemas import PasswordChangeRequest
 import apscheduler.schedulers.background
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -177,6 +177,7 @@ app.include_router(backup.router)
 app.include_router(export.router)
 app.include_router(alerts.router)
 app.include_router(activity.router)
+app.include_router(expenses.router)
 
 
 BACKUP_DIR = os.path.join(os.path.dirname(__file__), "backups")

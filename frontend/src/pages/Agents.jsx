@@ -52,7 +52,7 @@ export default function Agents() {
 
   const openAdd = () => { setForm(emptyForm); setEditingId(null); setModalOpen(true); };
   const openEdit = (a) => {
-    setForm({ name: a.name, phone: a.phone, email: a.email, commission_rate: a.commission_rate, status: a.status });
+    setForm({ name: a.name, phone: a.phone || '', email: a.email || '', commission_rate: a.commission_rate, status: a.status });
     setEditingId(a.id);
     setModalOpen(true);
   };
@@ -100,42 +100,46 @@ export default function Agents() {
     return matchesSearch && matchesStatus;
   });
 
+  const activeFilters = [statusFilter].filter(Boolean).length;
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-[22px] font-normal text-[#202124]">Agents</h1>
-          <p className="text-[13px] text-[#5f6368] mt-0.5">{agents.length} agent{agents.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-[22px] font-semibold text-primary">Agents</h1>
+          <p className="text-[13px] text-secondary mt-0.5">{agents.length} agent{agents.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={exportCSV} className="flex items-center gap-2 bg-white border border-[#dadce0] text-[#5f6368] px-4 py-2.5 rounded-full text-[13px] font-medium hover:bg-[#f1f3f4] transition-all">
+          <button onClick={exportCSV} className="btn btn-secondary">
             <Download size={16} /> Export CSV
           </button>
-          <button onClick={openAdd} className="flex items-center gap-2 bg-[#E74C3C] text-white px-5 py-2.5 rounded-full text-[13px] font-medium hover:bg-[#C0392B] transition-all">
+          <button onClick={openAdd} className="btn btn-primary">
             <Plus size={18} /> Add Agent
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#e0e0e0] mb-4 overflow-hidden">
+      {/* Search & Filter */}
+      <div className="card mb-4 overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex-1 flex items-center gap-2 bg-[#f1f3f4] rounded-full px-4 py-2">
-            <Search size={18} className="text-[#5f6368]" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search agents..." className="w-full bg-transparent outline-none text-[13px] text-[#202124] placeholder:text-[#5f6368]" />
-            {search && <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-[#e8eaed]"><X size={16} className="text-[#5f6368]" /></button>}
+          <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-4 py-2">
+            <Search size={18} className="text-secondary" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search agents..." className="w-full bg-transparent outline-none text-[13px] text-primary placeholder:text-tertiary" />
+            {search && <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-hover"><X size={16} className="text-tertiary" /></button>}
           </div>
-          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors ${showFilters ? 'bg-[#f0f0f0] text-[#2E2E2E]' : 'text-[#5f6368] hover:bg-[#f1f3f4]'}`}>
+          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors relative ${showFilters ? 'bg-hover text-primary' : 'text-secondary hover:bg-muted'}`}>
             <Filter size={16} /><span>Filter</span>
+            {activeFilters > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white rounded-full text-[10px] flex items-center justify-center">{activeFilters}</span>}
           </button>
         </div>
         {showFilters && (
-          <div className="px-4 pb-3 flex items-center gap-3 border-t border-[#f0f0f0] pt-3">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-3 py-2 border border-[#dadce0] rounded-lg text-[13px] focus:ring-0 outline-none bg-white">
+          <div className="px-4 pb-3 flex items-center gap-3 border-t border-border pt-3">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="select w-auto">
               <option value="">All Statuses</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-            {statusFilter && <button onClick={() => setStatusFilter('')} className="flex items-center gap-1 text-[13px] text-[#E74C3C] hover:underline"><X size={14} /> Clear</button>}
+            {statusFilter && <button onClick={() => setStatusFilter('')} className="flex items-center gap-1 text-[13px] text-primary hover:underline"><X size={14} /> Clear</button>}
           </div>
         )}
       </div>
@@ -143,29 +147,42 @@ export default function Agents() {
       {/* Agent Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-full bg-white rounded-xl border border-[#e0e0e0] px-5 py-16 text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-[#E74C3C]" />
-          </div>
+          <>
+            {[1,2,3].map(i => (
+              <div key={i} className="card p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="skeleton w-12 h-12 rounded-full"></div>
+                  <div className="flex-1">
+                    <div className="skeleton h-4 w-32 mb-2"></div>
+                    <div className="skeleton h-3 w-16"></div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="skeleton h-3 w-24"></div>
+                  <div className="skeleton h-3 w-32"></div>
+                </div>
+              </div>
+            ))}
+          </>
         ) : filteredAgents.length === 0 ? (
-          <div className="col-span-full bg-white rounded-xl border border-[#e0e0e0] px-5 py-16 text-center">
-            <Users size={48} className="mx-auto text-[#dadce0] mb-3" />
-            <p className="text-[14px] text-[#5f6368]">No agents found</p>
-            <p className="text-[12px] text-[#9aa0a6] mt-1">Try a different search or add your first agent</p>
+          <div className="col-span-full card px-5 py-16 text-center">
+            <Users size={48} className="mx-auto text-tertiary mb-3" />
+            <p className="text-[14px] text-secondary">No agents found</p>
+            <p className="text-[12px] text-tertiary mt-1">Try a different search or add your first agent</p>
           </div>
         ) : filteredAgents.map((a) => (
-          <div key={a.id} className="bg-white rounded-xl border border-[#e0e0e0] overflow-hidden hover:shadow-[0_1px_3px_0_rgba(60,64,67,0.3),0_4px_8px_3px_rgba(60,64,67,0.15)] transition-all cursor-pointer group" onClick={() => navigate(`/agents/${a.id}`)}>
-            {/* Color bar */}
-            <div className={`h-1.5 ${a.status === 'active' ? 'bg-gradient-to-r from-[#E74C3C] to-[#C0392B]' : 'bg-[#dadce0]'}`}></div>
+          <div key={a.id} className="card card-hover overflow-hidden cursor-pointer group" onClick={() => navigate(`/agents/${a.id}`)}>
+            <div className={`h-1.5 ${a.status === 'active' ? 'bg-gradient-to-r from-primary to-primary-hover' : 'bg-tertiary'}`}></div>
             <div className="p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#E74C3C] to-[#C0392B] flex items-center justify-center text-white text-lg font-bold">
+                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
                     {a.name?.charAt(0)}
                   </div>
-                  <div>
-                    <h3 className="text-[15px] font-medium text-[#202124] group-hover:text-[#E74C3C] transition-colors">{a.name}</h3>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-medium text-primary group-hover:text-primary transition-colors truncate">{a.name}</h3>
                     <span className={`inline-flex items-center gap-1 text-[11px] font-medium ${
-                      a.status === 'active' ? 'text-[#1e8e3e]' : 'text-[#d93025]'
+                      a.status === 'active' ? 'text-success' : 'text-danger'
                     }`}>
                       {a.status === 'active' ? <CheckCircle size={12} /> : <XCircle size={12} />}
                       {a.status}
@@ -173,14 +190,14 @@ export default function Agents() {
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => openEdit(a)} className="p-1.5 rounded-full hover:bg-[#f1f3f4]"><Edit2 size={16} className="text-[#5f6368]" /></button>
-                  <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-full hover:bg-[#fce8e6]"><Trash2 size={16} className="text-[#d93025]" /></button>
+                  <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-hover"><Edit2 size={16} className="text-secondary" /></button>
+                  <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-danger-light"><Trash2 size={16} className="text-danger" /></button>
                 </div>
               </div>
               <div className="space-y-2 text-[13px]">
-                {a.phone && <p className="text-[#5f6368]">📱 {a.phone}</p>}
-                {a.email && <p className="text-[#5f6368]">✉️ {a.email}</p>}
-                <p className="text-[#202124] font-medium">Commission: {a.commission_rate}%</p>
+                {a.phone && <p className="text-secondary">{a.phone}</p>}
+                {a.email && <p className="text-secondary">{a.email}</p>}
+                <p className="text-primary font-medium">Commission: {a.commission_rate}%</p>
               </div>
             </div>
           </div>
@@ -191,32 +208,32 @@ export default function Agents() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">Name *</label>
-              <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:border-[#E74C3C] focus:ring-0 outline-none" />
+              <label className="label">Name *</label>
+              <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required className="input" placeholder="Agent name" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">Phone</label>
-              <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:border-[#E74C3C] focus:ring-0 outline-none" />
+              <label className="label">Phone</label>
+              <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="input" placeholder="Phone number" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">Email</label>
-              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:border-[#E74C3C] focus:ring-0 outline-none" />
+              <label className="label">Email</label>
+              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="input" placeholder="Email address" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">Commission Rate (%)</label>
-              <input type="number" step="0.1" value={form.commission_rate} onChange={e => setForm({...form, commission_rate: e.target.value})} className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:border-[#E74C3C] focus:ring-0 outline-none" />
+              <label className="label">Commission Rate (%)</label>
+              <input type="number" step="0.1" value={form.commission_rate} onChange={e => setForm({...form, commission_rate: e.target.value})} className="input" />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">Status</label>
-              <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:ring-0 outline-none bg-white">
+              <label className="label">Status</label>
+              <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} className="select">
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-3 border-t border-[#e0e0e0]">
-            <button type="button" onClick={() => setModalOpen(false)} className="px-5 py-2.5 rounded-full text-[13px] font-medium text-[#5f6368] hover:bg-[#f1f3f4]">Cancel</button>
-            <button type="submit" className="px-5 py-2.5 bg-[#E74C3C] text-white rounded-full text-[13px] font-medium hover:bg-[#C0392B]">{editingId ? 'Update' : 'Create'}</button>
+          <div className="flex justify-end gap-3 pt-3 border-t border-border">
+            <button type="button" onClick={() => setModalOpen(false)} className="btn btn-ghost">Cancel</button>
+            <button type="submit" className="btn btn-primary">{editingId ? 'Update' : 'Create'}</button>
           </div>
         </form>
       </Modal>

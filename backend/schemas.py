@@ -154,6 +154,7 @@ class VisaCreate(BaseModel):
     extra_charges: float = Field(default=0.0, ge=0)
     received: float = Field(default=0.0, ge=0)
     purchase_rate: float = Field(default=0.0, ge=0)
+    agent_commission_percentage: float = Field(default=0.0, ge=0, le=100)
     status: Literal["pending", "approved", "rejected"] = "pending"
 
 
@@ -174,6 +175,7 @@ class VisaUpdate(BaseModel):
     extra_charges: Optional[float] = Field(default=None, ge=0)
     received: Optional[float] = Field(default=None, ge=0)
     purchase_rate: Optional[float] = Field(default=None, ge=0)
+    agent_commission_percentage: Optional[float] = Field(default=None, ge=0, le=100)
     status: Optional[Literal["pending", "approved", "rejected"]] = None
 
 
@@ -198,6 +200,7 @@ class VisaOut(BaseModel):
     dues: float
     purchase_rate: float
     commission: float
+    agent_commission_percentage: float
     status: str
     created_at: datetime
     agent_name: str = ""
@@ -266,9 +269,57 @@ class DashboardStats(BaseModel):
     total_tickets: int
     total_visas: int
     total_agents: int
+    total_received: float
+    total_dues: float
+    my_commission: float
+    ticket_profit: float
+    visa_profit: float
+    agent_commission: float
     total_revenue: float
-    total_commission: float
-    total_expenses: float
-    pending_payments: float
     recent_tickets: list
     recent_visas: list
+    monthly_revenue: list
+    top_agents: list
+
+
+# Expense
+EXPENSE_CATEGORIES = [
+    "office_rent", "utilities", "internet", "electricity", "water",
+    "salaries", "transportation", "office_supplies", "maintenance",
+    "marketing", "food", "travel", "other",
+]
+
+
+class ExpenseCreate(BaseModel):
+    title: str
+    category: str = "other"
+    amount: float = Field(default=0.0, ge=0)
+    date: str = ""
+    payment_method: Literal["cash", "bank"] = "cash"
+    payment_remarks: str = ""
+    notes: str = ""
+
+
+class ExpenseUpdate(BaseModel):
+    title: Optional[str] = None
+    category: Optional[str] = None
+    amount: Optional[float] = Field(default=None, ge=0)
+    date: Optional[str] = None
+    payment_method: Optional[Literal["cash", "bank"]] = None
+    payment_remarks: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class ExpenseOut(BaseModel):
+    id: int
+    title: str
+    category: str
+    amount: float
+    date: str
+    payment_method: str
+    payment_remarks: str
+    notes: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

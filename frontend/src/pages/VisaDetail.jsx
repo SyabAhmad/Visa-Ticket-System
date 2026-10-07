@@ -37,49 +37,52 @@ export default function VisaDetail() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E74C3C]"></div>
+      <div className="flex flex-col items-center gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-sm text-secondary">Loading visa...</p>
+      </div>
     </div>
   );
   if (!visa) return null;
 
-  const InfoRow = ({ icon: Icon, label, value, color = '#5f6368' }) => (
+  const InfoRow = ({ icon: Icon, label, value }) => (
     <div className="flex items-start gap-3 py-3">
-      <div className="w-9 h-9 rounded-full bg-[#f1f3f4] flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon size={18} style={{ color }} />
+      <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon size={16} className="text-secondary" />
       </div>
       <div>
-        <p className="text-[11px] text-[#5f6368] uppercase tracking-wider font-medium">{label}</p>
-        <p className="text-[14px] text-[#202124] mt-0.5">{value || '—'}</p>
+        <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">{label}</p>
+        <p className="text-[13px] text-primary mt-0.5">{value || '—'}</p>
       </div>
     </div>
   );
 
   const statusConfig = {
-    approved: { bg: 'bg-[#e6f4ea]', text: 'text-[#1e8e3e]', icon: CheckCircle, label: 'Approved' },
-    rejected: { bg: 'bg-[#fce8e6]', text: 'text-[#d93025]', icon: XCircle, label: 'Rejected' },
-    pending: { bg: 'bg-[#fef7e0]', text: 'text-[#e37400]', icon: Clock, label: 'Pending' },
+    approved: { bg: 'bg-success-light', text: 'text-success', icon: CheckCircle, label: 'Approved' },
+    rejected: { bg: 'bg-danger-light', text: 'text-danger', icon: XCircle, label: 'Rejected' },
+    pending: { bg: 'bg-warning-light', text: 'text-warning', icon: Clock, label: 'Pending' },
   };
   const status = statusConfig[visa.status] || statusConfig.pending;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate('/visas')} className="p-2 rounded-full hover:bg-[#f1f3f4] transition-colors">
-          <ArrowLeft size={22} className="text-[#5f6368]" />
+        <button onClick={() => navigate('/visas')} className="p-2 rounded-lg hover:bg-hover transition-colors">
+          <ArrowLeft size={20} className="text-secondary" />
         </button>
-        <div className="flex-1">
-          <h1 className="text-[22px] font-normal text-[#202124]">Visa Details</h1>
-          <p className="text-[13px] text-[#5f6368]">{visa.visa_type} — {visa.passenger_name}</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[22px] font-semibold text-primary">Visa Details</h1>
+          <p className="text-[13px] text-secondary mt-0.5">{visa.visa_type} — {visa.passenger_name}</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setPrintOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#d4d4d4] text-[13px] font-medium text-[#4A4A4A] hover:bg-[#f0f0f0] transition-colors">
+        <div className="flex gap-2 flex-shrink-0">
+          <button onClick={() => setPrintOpen(true)} className="btn btn-secondary">
             <Printer size={16} /> Print Slip
           </button>
-          <button onClick={() => navigate('/visas', { state: { editId: visa.id } })} className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#d4d4d4] text-[13px] font-medium text-[#4A4A4A] hover:bg-[#f0f0f0] transition-colors">
+          <button onClick={() => navigate('/visas', { state: { editId: visa.id } })} className="btn btn-secondary">
             <Edit2 size={16} /> Edit
           </button>
-          <button onClick={handleDelete} className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#fce8e6] text-[13px] font-medium text-[#d93025] hover:bg-[#fce8e6] transition-colors">
+          <button onClick={handleDelete} className="btn btn-danger">
             <Trash2 size={16} /> Delete
           </button>
         </div>
@@ -93,15 +96,18 @@ export default function VisaDetail() {
             <status.icon size={28} className={status.text} />
             <div>
               <p className={`text-[16px] font-medium ${status.text}`}>{status.label}</p>
-              <p className="text-[13px] text-[#5f6368]">Visa status</p>
+              <p className="text-[13px] text-secondary">Visa status</p>
             </div>
           </div>
 
           {/* Personal Info Card */}
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-6">
-            <h3 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-2">Personal Information</h3>
+          <div className="card p-6">
+            <div className="section-header">
+              <User size={16} className="text-primary" />
+              <h3>Personal Information</h3>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
-              <InfoRow icon={User} label="Passenger" value={visa.passenger_name} color="#202124" />
+              <InfoRow icon={User} label="Passenger" value={visa.passenger_name} />
               <InfoRow icon={Phone} label="Contact Number" value={visa.contact_number} />
               <InfoRow icon={Globe} label="Passport Number" value={visa.passport_number} />
               <InfoRow icon={Calendar} label="Date of Birth" value={visa.dob} />
@@ -111,10 +117,13 @@ export default function VisaDetail() {
           </div>
 
           {/* Visa Info Card */}
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-6">
-            <h3 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-2">Visa Information</h3>
+          <div className="card p-6">
+            <div className="section-header">
+              <Globe size={16} className="text-primary" />
+              <h3>Visa Information</h3>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
-              <InfoRow icon={Globe} label="Visa Type" value={visa.visa_type} color="#E74C3C" />
+              <InfoRow icon={Globe} label="Visa Type" value={visa.visa_type} />
               <InfoRow icon={Hash} label="Visa Number" value={visa.visa_number} />
               <InfoRow icon={FileText} label="Sponsor Number" value={visa.sponsor_number} />
             </div>
@@ -124,69 +133,78 @@ export default function VisaDetail() {
         {/* Financial Sidebar */}
         <div className="space-y-4">
           {/* Charges Breakdown */}
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-6">
-            <h3 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-4">Charges Breakdown</h3>
+          <div className="card p-6">
+            <div className="section-header">
+              <FileText size={16} className="text-primary" />
+              <h3>Charges Breakdown</h3>
+            </div>
             <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Visa Process</span>
-                <span className="text-[14px] text-[#202124] font-medium">PKR {visa.visa_process_charges.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Visa Process</span>
+                <span className="text-[14px] text-primary font-semibold">PKR {(visa.visa_process_charges || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Medical Token</span>
-                <span className="text-[14px] text-[#202124] font-medium">PKR {visa.medical_token_charges.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Medical Token</span>
+                <span className="text-[14px] text-primary font-semibold">PKR {(visa.medical_token_charges || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Agreement Paper</span>
-                <span className="text-[14px] text-[#202124] font-medium">PKR {visa.agreement_paper_charges.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Agreement Paper</span>
+                <span className="text-[14px] text-primary font-semibold">PKR {(visa.agreement_paper_charges || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Extra Charges</span>
-                <span className="text-[14px] text-[#202124] font-medium">PKR {visa.extra_charges.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Extra Charges</span>
+                <span className="text-[14px] text-primary font-semibold">PKR {(visa.extra_charges || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 pt-2">
-                <span className="text-[13px] font-medium text-[#202124]">Total Charges</span>
-                <span className="text-[16px] font-medium text-[#202124]">PKR {visa.total_charges.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 pt-1">
+                <span className="text-[13px] font-semibold text-primary">Total Charges</span>
+                <span className="text-[16px] font-bold text-primary">PKR {(visa.total_charges || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>
 
           {/* Payment & Profit */}
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-6">
-            <h3 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-4">Payment & Profit</h3>
+          <div className="card p-6">
+            <div className="section-header">
+              <Banknote size={16} className="text-primary" />
+              <h3>Payment & Profit</h3>
+            </div>
             <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Received</span>
-                <span className="text-[14px] text-[#1e8e3e] font-medium">PKR {visa.received.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Received</span>
+                <span className="text-[14px] text-success font-semibold">PKR {(visa.received || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Dues</span>
-                <span className={`text-[14px] font-medium ${visa.dues > 0 ? 'text-[#d93025]' : 'text-[#1e8e3e]'}`}>
-                  PKR {visa.dues.toLocaleString()}
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Dues</span>
+                <span className={`text-[14px] font-semibold ${(visa.dues || 0) > 0 ? 'text-danger' : 'text-success'}`}>
+                  PKR {(visa.dues || 0).toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Purchase Rate</span>
-                <span className="text-[14px] text-[#202124] font-medium">PKR {visa.purchase_rate.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Purchase Rate</span>
+                <span className="text-[14px] text-primary font-semibold">PKR {(visa.purchase_rate || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 pt-2">
-                <span className="text-[13px] font-medium text-[#202124]">Commission / Profit</span>
-                <span className={`text-[16px] font-medium ${visa.commission >= 0 ? 'text-[#1e8e3e]' : 'text-[#d93025]'}`}>
-                  PKR {visa.commission.toLocaleString()}
+              <div className="flex justify-between items-center py-2 pt-1">
+                <span className="text-[13px] font-semibold text-primary">Commission / Profit</span>
+                <span className={`text-[16px] font-bold ${(visa.commission || 0) >= 0 ? 'text-success' : 'text-danger'}`}>
+                  PKR {(visa.commission || 0).toLocaleString()}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Agent */}
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-6">
-            <h3 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-3">Agent</h3>
+          <div className="card p-6">
+            <div className="section-header">
+              <User size={16} className="text-primary" />
+              <h3>Agent</h3>
+            </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#E74C3C] to-[#C0392B] flex items-center justify-center text-white font-medium text-sm">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
                 {visa.agent_name?.charAt(0)}
               </div>
               <div>
-                <p className="text-[14px] font-medium text-[#202124]">{visa.agent_name}</p>
-                <p className="text-[12px] text-[#5f6368]">Agent</p>
+                <p className="text-[14px] font-medium text-primary">{visa.agent_name}</p>
+                <p className="text-[12px] text-secondary">Agent</p>
               </div>
             </div>
           </div>
@@ -205,19 +223,29 @@ export default function VisaDetail() {
         <SlipRow label="Visa Number" value={visa.visa_number} />
         <SlipRow label="Sponsor Number" value={visa.sponsor_number} />
         <SlipSection title="Charges" />
-        <SlipRow label="Visa Process" value={`PKR ${visa.visa_process_charges.toLocaleString()}`} />
-        <SlipRow label="Medical Token" value={`PKR ${visa.medical_token_charges.toLocaleString()}`} />
-        <SlipRow label="Agreement Paper" value={`PKR ${visa.agreement_paper_charges.toLocaleString()}`} />
-        <SlipRow label="Extra Charges" value={`PKR ${visa.extra_charges.toLocaleString()}`} />
-        <SlipRow label="Total Charges" value={`PKR ${visa.total_charges.toLocaleString()}`} bold />
+        <SlipRow label="Visa Process" value={`PKR ${(visa.visa_process_charges || 0).toLocaleString()}`} />
+        <SlipRow label="Medical Token" value={`PKR ${(visa.medical_token_charges || 0).toLocaleString()}`} />
+        <SlipRow label="Agreement Paper" value={`PKR ${(visa.agreement_paper_charges || 0).toLocaleString()}`} />
+        <SlipRow label="Extra Charges" value={`PKR ${(visa.extra_charges || 0).toLocaleString()}`} />
+        <SlipRow label="Total Charges" value={`PKR ${(visa.total_charges || 0).toLocaleString()}`} bold />
         <SlipSection title="Payment & Profit" />
-        <SlipRow label="Received" value={`PKR ${visa.received.toLocaleString()}`} />
-        <SlipRow label="Dues" value={`PKR ${visa.dues.toLocaleString()}`} bold />
-        <SlipRow label="Purchase Rate" value={`PKR ${visa.purchase_rate.toLocaleString()}`} />
-        <SlipRow label="Commission" value={`PKR ${visa.commission.toLocaleString()}`} bold />
-        <SlipRow label="Status" value={visa.status.toUpperCase()} bold />
+        <SlipRow label="Received" value={`PKR ${(visa.received || 0).toLocaleString()}`} />
+        <SlipRow label="Dues" value={`PKR ${(visa.dues || 0).toLocaleString()}`} bold />
+        <SlipRow label="Purchase Rate" value={`PKR ${(visa.purchase_rate || 0).toLocaleString()}`} />
+        <SlipRow label="Commission" value={`PKR ${(visa.commission || 0).toLocaleString()}`} bold />
+        <SlipRow label="Status" value={(visa.status || '').toUpperCase()} bold />
         <SlipRow label="Agent" value={visa.agent_name} />
       </PrintSlip>
     </div>
+  );
+}
+
+function Banknote(props) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect width="20" height="12" x="2" y="6" rx="2" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M6 12h.01M18 12h.01" />
+    </svg>
   );
 }

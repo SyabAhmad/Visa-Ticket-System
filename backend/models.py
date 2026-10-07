@@ -99,6 +99,7 @@ class VisaProcessing(Base):
 
     purchase_rate = Column(Float, default=0.0)
     commission = Column(Float, default=0.0)
+    agent_commission_percentage = Column(Float, default=0.0)
 
     status = Column(String, default="pending")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -144,5 +145,20 @@ class ActivityLog(Base):
     entity_type = Column(String)
     entity_id = Column(Integer)
     details = Column(Text, default="")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+
+class Expense(Base):
+    __tablename__ = "expenses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    category = Column(String, default="other")
+    amount = Column(Float, default=0.0)
+    date = Column(String, default="")
+    payment_method = Column(String, default="cash")
+    payment_remarks = Column(Text, default="")
+    notes = Column(Text, default="")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

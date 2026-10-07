@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
 from datetime import datetime, timedelta, timezone
 from database import get_db
-from models import TicketBooking, VisaProcessing, Agent, CashOut
+from models import TicketBooking, VisaProcessing, Agent
 from auth import get_current_user
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
@@ -30,49 +30,43 @@ def get_dashboard(
 ):
     date_from = get_date_filter(period)
 
-    def filter_query(query):
-        if date_from:
-            query = query.filter(TicketBooking.created_at >= date_from) if query.column_descriptions.get('primary_entity') == 'TicketBooking' else query.filter(VisaProcessing.created_at >= date_from)
-        return query
-
-    # Tickets
+    # ── Tickets ──
     ticket_query = db.query(TicketBooking)
     if date_from:
         ticket_query = ticket_query.filter(TicketBooking.created_at >= date_from)
     total_tickets = ticket_query.count()
 
-    # Visas
+    # ── Visas ──
     visa_query = db.query(VisaProcessing)
     if date_from:
         visa_query = visa_query.filter(VisaProcessing.created_at >= date_from)
     total_visas = visa_query.count()
 
+    # ── Agents ──
     total_agents = db.query(Agent).count()
 
-    # Revenue
-    total_revenue_ticket = ticket_query.with_entities(func.sum(TicketBooking.total_payment)).scalar() or 0
-    total_revenue_visa = visa_query.with_entities(func.sum(VisaProcessing.total_charges)).scalar() or 0
-    total_revenue = total_revenue_ticket + total_revenue_visa
+    # ── Total Received (from customers) ──
+    ticket_received = ticket_query.with_entities(func.sum(TicketBooking.received_payment)).scalar() or 0
+    visa_received = visa_query.with_entities(func.sum(VisaProcessing.received)).scalar() or 0
+    total_received = ticket_received + visa_received
 
-    # Commission
-    total_commission_ticket = ticket_query.with_entities(func.sum(TicketBooking.agent_commission)).scalar() or 0
-    total_commission_visa = visa_query.with_entities(func.sum(VisaProcessing.commission)).scalar() or 0
-    total_commission = total_commission_ticket + total_commission_visa
+    # ── Total Dues (still owed by customers) ──
+    ticket_dues = ticket_query.with_entities(func.sum(TicketBooking.dues)).scalar() or 0
+    visa_dues = visa_query.with_entities(func.sum(VisaProcessing.dues)).scalar() or 0
+    total_dues = ticket_dues + visa_dues
 
-    # Expenses (visas no longer track expenses separately)
-    total_expenses = 0
+    # ── My Commission / Business Profit ──
+    # Ticket profit = total_payment - purchase_rate
+    # Visa profit/commission = total_charges - purchase_rate
+    # This is the owner's profit, NOT agent commission
+    ticket_profit = ticket_query.with_entities(func.sum(TicketBooking.ticket_profit)).scalar() or 0
+    visa_profit = visa_query.with_entities(func.sum(VisaProcessing.commission)).scalar() or 0
+    my_commission = ticket_profit + visa_profit
 
-    # Pending payments
-    pending_ticket_query = db.query(func.sum(TicketBooking.dues)).filter(
-        TicketBooking.payment_status != "paid"
-    )
-    pending_visa_query = db.query(func.sum(VisaProcessing.dues))
-    if date_from:
-        pending_ticket_query = pending_ticket_query.filter(TicketBooking.created_at >= date_from)
-        pending_visa_query = pending_visa_query.filter(VisaProcessing.created_at >= date_from)
-    pending_payments = (pending_ticket_query.scalar() or 0) + (pending_visa_query.scalar() or 0)
+    # ── Agent Commission (owed to agents) ──
+    agent_commission_ticket = ticket_query.with_entities(func.sum(TicketBooking.agent_commission)).scalar() or 0
 
-    # Recent tickets
+    # ── Recent tickets ──
     recent_tickets_raw = db.query(TicketBooking).order_by(TicketBooking.created_at.desc()).limit(5).all()
     agents_map = {a.id: a.name for a in db.query(Agent).all()}
     recent_tickets = [
@@ -83,13 +77,15 @@ def get_dashboard(
             "sector": t.sector,
             "departure_date": t.departure_date,
             "total_payment": t.total_payment,
+            "received_payment": t.received_payment,
+            "dues": t.dues,
             "payment_status": t.payment_status,
             "agent_name": agents_map.get(t.agent_id, ""),
         }
         for t in recent_tickets_raw
     ]
 
-    # Recent visas
+    # ── Recent visas ──
     recent_visas_raw = db.query(VisaProcessing).order_by(VisaProcessing.created_at.desc()).limit(5).all()
     recent_visas = [
         {
@@ -97,13 +93,15 @@ def get_dashboard(
             "passenger_name": v.passenger_name,
             "visa_type": v.visa_type,
             "total_charges": v.total_charges,
+            "received": v.received,
+            "dues": v.dues,
             "status": v.status,
             "agent_name": agents_map.get(v.agent_id, ""),
         }
         for v in recent_visas_raw
     ]
 
-    # Monthly revenue (last 6 months)
+    # ── Monthly revenue (last 6 months) ──
     monthly_revenue = []
     now = datetime.now(timezone.utc)
     for i in range(5, -1, -1):
@@ -129,7 +127,7 @@ def get_dashboard(
             "revenue": ticket_rev + visa_rev
         })
 
-    # Top agents by revenue
+    # ── Top agents by revenue ──
     agent_revenues = []
     for agent in db.query(Agent).filter(Agent.status == "active").all():
         ticket_rev = db.query(func.sum(TicketBooking.total_payment)).filter(
@@ -141,16 +139,13 @@ def get_dashboard(
         ticket_comm = db.query(func.sum(TicketBooking.agent_commission)).filter(
             TicketBooking.agent_id == agent.id
         ).scalar() or 0
-        visa_comm = db.query(func.sum(VisaProcessing.commission)).filter(
-            VisaProcessing.agent_id == agent.id
-        ).scalar() or 0
         total = ticket_rev + visa_rev
         if total > 0:
             agent_revenues.append({
                 "id": agent.id,
                 "name": agent.name,
                 "revenue": total,
-                "commission": ticket_comm + visa_comm
+                "commission": ticket_comm
             })
     agent_revenues.sort(key=lambda x: x["revenue"], reverse=True)
     top_agents = agent_revenues[:5]
@@ -159,10 +154,13 @@ def get_dashboard(
         "total_tickets": total_tickets,
         "total_visas": total_visas,
         "total_agents": total_agents,
-        "total_revenue": total_revenue,
-        "total_commission": total_commission,
-        "total_expenses": total_expenses,
-        "pending_payments": pending_payments,
+        "total_received": total_received,
+        "total_dues": total_dues,
+        "my_commission": my_commission,
+        "ticket_profit": ticket_profit,
+        "visa_profit": visa_profit,
+        "agent_commission": agent_commission_ticket,
+        "total_revenue": ticket_received + visa_received,
         "recent_tickets": recent_tickets,
         "recent_visas": recent_visas,
         "monthly_revenue": monthly_revenue,

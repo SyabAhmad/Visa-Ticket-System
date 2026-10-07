@@ -1,52 +1,90 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api';
 import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Search, Filter, X, Stamp, Download } from 'lucide-react';
+import {
+  Plus, Edit2, Trash2, Search, Filter, X, Stamp, Download,
+  User, CreditCard, FileText, Calculator,
+} from 'lucide-react';
 
 const emptyForm = {
   agent_id: '', passenger_name: '', contact_number: '', passport_number: '',
-  dob: '', passport_expiry: '', visa_type: 'umrah', visa_number: '',
-  sponsor_number: '', occupation: '',
-  visa_process_charges: '', medical_token_charges: '', agreement_paper_charges: '',
-  extra_charges: '', received: '', purchase_rate: '', status: 'pending',
+  dob: '', passport_expiry: '', occupation: '',
+  visa_type: 'umrah', visa_number: '', sponsor_number: '',
+  visa_process_charges: '', medical_token_charges: '',
+  agreement_paper_charges: '', extra_charges: '',
+  received: '', purchase_rate: '', agent_commission_percentage: '',
+  payment_method: 'cash', payment_remarks: '', status: 'pending',
 };
 
-function Field({ label, children, required }) {
+const statusOptions = [
+  { value: 'pending', label: 'Pending', dot: 'bg-warning' },
+  { value: 'approved', label: 'Approved', dot: 'bg-success' },
+  { value: 'rejected', label: 'Rejected', dot: 'bg-danger' },
+];
+
+const statusBadgeClass = {
+  pending: 'bg-warning-light text-warning',
+  approved: 'bg-success-light text-success',
+  rejected: 'bg-danger-light text-danger',
+};
+
+const paymentStatusBadge = (total, received) => {
+  const d = total - received;
+  if (d <= 0) return { text: 'Paid', cls: 'bg-success-light text-success' };
+  if (received > 0) return { text: 'Partial', cls: 'bg-warning-light text-warning' };
+  return { text: 'Unpaid', cls: 'bg-danger-light text-danger' };
+};
+
+function calcPreview(form) {
+  const vp = Number(form.visa_process_charges) || 0;
+  const mt = Number(form.medical_token_charges) || 0;
+  const ap = Number(form.agreement_paper_charges) || 0;
+  const ec = Number(form.extra_charges) || 0;
+  const total = vp + mt + ap + ec;
+  const received = Number(form.received) || 0;
+  const purchase = Number(form.purchase_rate) || 0;
+  const commission = total - purchase;
+  const commissionPct = total > 0 ? ((commission / total) * 100).toFixed(1) : '0.0';
+  return { total, commission, commissionPct };
+}
+
+function SectionHeader({ icon: Icon, title, color }) {
+  return (
+    <div className="section-header mb-4 mt-1">
+      <div className={`flex items-center justify-center w-7 h-7 rounded-lg ${color}`}>
+        <Icon size={15} className="text-white" />
+      </div>
+      <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">{title}</h3>
+    </div>
+  );
+}
+
+function FormField({ label, required, children }) {
   return (
     <div>
-      <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">
-        {label} {required && <span className="text-[#d93025]">*</span>}
+      <label className="label">
+        {label} {required && <span className="text-danger">*</span>}
       </label>
       {children}
     </div>
   );
 }
 
-function Input({ label, required, readOnly, className = '', ...props }) {
+function SkeletonRows({ rows = 8 }) {
   return (
-    <Field label={label} required={required}>
-      <input
-        {...props}
-        readOnly={readOnly}
-        className={`w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] text-[#202124] focus:border-[#E74C3C] focus:ring-0 outline-none transition-colors ${readOnly ? 'bg-[#f8f9fa] text-[#5f6368]' : 'bg-white'} ${className}`}
-      />
-    </Field>
-  );
-}
-
-function Select({ label, required, readOnly, children, ...props }) {
-  return (
-    <Field label={label} required={required}>
-      <select
-        {...props}
-        disabled={readOnly}
-        className={`w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] text-[#202124] focus:border-[#E74C3C] focus:ring-0 outline-none transition-colors bg-white ${readOnly ? 'bg-[#f8f9fa] text-[#5f6368]' : ''}`}
-      >
-        {children}
-      </select>
-    </Field>
+    <tbody>
+      {Array.from({ length: rows }).map((_, i) => (
+        <tr key={i} className="border-b border-border">
+          {Array.from({ length: 11 }).map((_, j) => (
+            <td key={j} className="px-4 py-3.5">
+              <div className="skeleton h-4 rounded" style={{ width: j === 0 ? '60%' : j === 7 ? '70%' : '80%' }} />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
   );
 }
 
@@ -57,36 +95,29 @@ export default function Visas() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterAgent, setFilterAgent] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterPayment, setFilterPayment] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const searchTimeout = useRef(null);
-  const [loading, setLoading] = useState(true);
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     const params = {};
     if (filterAgent) params.agent_id = filterAgent;
+    if (filterStatus) params.status = filterStatus;
     if (debouncedSearch) params.search = debouncedSearch;
-    api.get('/visas/', { params }).then(res => setVisas(res.data)).catch(() => toast.error('Failed to load visas')).finally(() => setLoading(false));
-  };
-
-  const exportCSV = () => {
-    const params = {};
-    if (filterAgent) params.agent_id = filterAgent;
-    if (debouncedSearch) params.search = debouncedSearch;
-    api.get('/visas/export', { params, responseType: 'blob' }).then(res => {
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'visas_export.csv';
-      a.click();
-      window.URL.revokeObjectURL(url);
-    });
-  };
+    api.get('/visas/', { params })
+      .then(res => setVisas(res.data))
+      .catch(() => toast.error('Failed to load visas'))
+      .finally(() => setLoading(false));
+  }, [filterAgent, filterStatus, debouncedSearch]);
 
   useEffect(() => {
     api.get('/agents/').then(res => setAgents(res.data));
@@ -99,11 +130,9 @@ export default function Visas() {
     return () => clearTimeout(searchTimeout.current);
   }, [search]);
 
-  useEffect(() => { load(); }, [filterAgent, debouncedSearch]);
+  useEffect(() => { load(); }, [load]);
 
-  useEffect(() => {
-    return () => clearTimeout(searchTimeout.current);
-  }, []);
+  useEffect(() => () => clearTimeout(searchTimeout.current), []);
 
   useEffect(() => {
     if (location.state?.editId) {
@@ -112,17 +141,40 @@ export default function Visas() {
     }
   }, [location.state]);
 
+  const exportCSV = () => {
+    const params = {};
+    if (filterAgent) params.agent_id = filterAgent;
+    if (filterStatus) params.status = filterStatus;
+    if (debouncedSearch) params.search = debouncedSearch;
+    api.get('/visas/export', { params, responseType: 'blob' })
+      .then(res => {
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'visas_export.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(() => toast.error('Export failed'));
+  };
+
   const openAdd = () => { setForm(emptyForm); setEditingId(null); setModalOpen(true); };
+
   const openEdit = (v) => {
     setForm({
       agent_id: v.agent_id || '', passenger_name: v.passenger_name || '',
       contact_number: v.contact_number || '', passport_number: v.passport_number || '',
       dob: v.dob || '', passport_expiry: v.passport_expiry || '',
-      visa_type: v.visa_type || 'umrah', visa_number: v.visa_number || '',
-      sponsor_number: v.sponsor_number || '', occupation: v.occupation || '',
-      visa_process_charges: v.visa_process_charges || '', medical_token_charges: v.medical_token_charges || '',
-      agreement_paper_charges: v.agreement_paper_charges || '', extra_charges: v.extra_charges || '',
-      received: v.received || '', purchase_rate: v.purchase_rate || '', status: v.status || 'pending',
+      occupation: v.occupation || '', visa_type: v.visa_type || 'umrah',
+      visa_number: v.visa_number || '', sponsor_number: v.sponsor_number || '',
+      visa_process_charges: v.visa_process_charges || '',
+      medical_token_charges: v.medical_token_charges || '',
+      agreement_paper_charges: v.agreement_paper_charges || '',
+      extra_charges: v.extra_charges || '', received: v.received || '',
+      purchase_rate: v.purchase_rate || '',
+      agent_commission_percentage: v.agent_commission_percentage || '',
+      payment_method: v.payment_method || 'cash',
+      payment_remarks: v.payment_remarks || '', status: v.status || 'pending',
     });
     setEditingId(v.id);
     setModalOpen(true);
@@ -137,242 +189,540 @@ export default function Visas() {
       passport_number: form.passport_number,
       dob: form.dob,
       passport_expiry: form.passport_expiry,
+      occupation: form.occupation,
       visa_type: form.visa_type,
       visa_number: form.visa_number,
       sponsor_number: form.sponsor_number,
-      occupation: form.occupation,
       visa_process_charges: Number(form.visa_process_charges) || 0,
       medical_token_charges: Number(form.medical_token_charges) || 0,
       agreement_paper_charges: Number(form.agreement_paper_charges) || 0,
       extra_charges: Number(form.extra_charges) || 0,
       received: Number(form.received) || 0,
       purchase_rate: Number(form.purchase_rate) || 0,
+      agent_commission_percentage: Number(form.agent_commission_percentage) || 0,
+      payment_method: form.payment_method,
+      payment_remarks: form.payment_remarks,
       status: form.status,
     };
     try {
-      if (editingId) { await api.put(`/visas/${editingId}`, data); toast.success('Visa updated'); }
-      else { await api.post('/visas/', data); toast.success('Visa created'); }
+      if (editingId) {
+        await api.put(`/visas/${editingId}`, data);
+        toast.success('Visa updated');
+      } else {
+        await api.post('/visas/', data);
+        toast.success('Visa created');
+      }
       setModalOpen(false);
       load();
-    } catch (err) { toast.error(err.response?.data?.detail || 'Error saving visa'); }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error saving visa');
+    }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this visa?')) return;
     try {
       await api.delete(`/visas/${id}`);
       toast.success('Visa deleted');
+      setDeleteConfirm(null);
       load();
-    } catch (err) {
+    } catch {
       toast.error('Error deleting visa');
     }
   };
 
-  const calcPreview = () => {
-    const vp = Number(form.visa_process_charges) || 0;
-    const mt = Number(form.medical_token_charges) || 0;
-    const ap = Number(form.agreement_paper_charges) || 0;
-    const ec = Number(form.extra_charges) || 0;
-    const received = Number(form.received) || 0;
-    const purchase = Number(form.purchase_rate) || 0;
-    const total = vp + mt + ap + ec;
-    const dues = total - received;
-    const commission = total - purchase;
-    return { total, dues, commission };
-  };
-  const preview = calcPreview();
+  const preview = useMemo(() => calcPreview(form), [form]);
+
+  const formatCurrency = (v) => `PKR ${(v || 0).toLocaleString()}`;
+
+  const filteredVisas = useMemo(() => {
+    if (!filterPayment) return visas;
+    return visas.filter(v => {
+      const ps = paymentStatusBadge(v.total_charges, v.received);
+      return ps.text.toLowerCase() === filterPayment;
+    });
+  }, [visas, filterPayment]);
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-[1200px] mx-auto">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-[22px] font-normal text-[#202124]">Visa Processing</h1>
-          <p className="text-[13px] text-[#5f6368] mt-0.5">{visas.length} record{visas.length !== 1 ? 's' : ''} total</p>
+          <h1 className="text-[22px] font-semibold text-primary flex items-center gap-2">
+            <Stamp size={24} className="text-primary" />
+            Visa Processing
+          </h1>
+          <p className="text-[13px] text-secondary mt-1">
+            {filteredVisas.length} record{filteredVisas.length !== 1 ? 's' : ''} total
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={exportCSV} className="flex items-center gap-2 bg-white border border-[#dadce0] text-[#5f6368] px-4 py-2.5 rounded-full text-[13px] font-medium hover:bg-[#f1f3f4] transition-all">
+          <button onClick={exportCSV} className="btn btn-secondary">
             <Download size={16} /> Export CSV
           </button>
-          <button onClick={openAdd} className="flex items-center gap-2 bg-[#E74C3C] text-white px-5 py-2.5 rounded-full text-[13px] font-medium hover:bg-[#C0392B] hover:shadow-[0_1px_3px_0_rgba(60,64,67,0.3)] transition-all">
+          <button onClick={openAdd} className="btn btn-primary">
             <Plus size={18} /> New Visa
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#e0e0e0] mb-4 overflow-hidden">
+      {/* Search & Filters Bar */}
+      <div className="card mb-4">
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex-1 flex items-center gap-2 bg-[#f1f3f4] rounded-full px-4 py-2">
-            <Search size={18} className="text-[#5f6368]" />
-            <input type="text" placeholder="Search visas..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-transparent outline-none text-[13px] text-[#202124] placeholder:text-[#5f6368]" />
-            {search && <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-[#e8eaed]"><X size={16} className="text-[#5f6368]" /></button>}
+          <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-4 py-2">
+            <Search size={18} className="text-secondary" />
+            <input
+              type="text"
+              placeholder="Search by name, passport, visa number..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full bg-transparent outline-none text-[13px] text-primary placeholder:text-tertiary"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-hover">
+                <X size={16} className="text-secondary" />
+              </button>
+            )}
           </div>
-          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors ${showFilters ? 'bg-[#f0f0f0] text-[#E74C3C]' : 'text-[#5f6368] hover:bg-[#f1f3f4]'}`}>
-            <Filter size={16} /><span>Filter</span>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-medium transition-colors ${
+              showFilters || filterAgent || filterStatus || filterPayment
+                ? 'bg-danger-light text-primary'
+                : 'text-secondary hover:bg-muted'
+            }`}
+          >
+            <Filter size={16} />
+            <span>Filters</span>
+            {(filterAgent || filterStatus || filterPayment) && (
+              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold">
+                {[filterAgent, filterStatus, filterPayment].filter(Boolean).length}
+              </span>
+            )}
           </button>
         </div>
+
         {showFilters && (
-          <div className="px-4 pb-3 flex items-center gap-3 border-t border-[#f0f0f0] pt-3">
-            <select value={filterAgent} onChange={(e) => setFilterAgent(e.target.value)} className="px-3 py-2 border border-[#dadce0] rounded-lg text-[13px] focus:ring-0 outline-none bg-white">
-              <option value="">All Agents</option>
-              {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </select>
-            {filterAgent && <button onClick={() => setFilterAgent('')} className="flex items-center gap-1 text-[13px] text-[#E74C3C] hover:underline"><X size={14} /> Clear</button>}
+          <div className="px-4 pb-4 border-t border-border pt-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Agent</span>
+                <select
+                  value={filterAgent}
+                  onChange={e => setFilterAgent(e.target.value)}
+                  className="select text-[13px] w-auto min-w-[160px]"
+                >
+                  <option value="">All Agents</option>
+                  {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Visa Status</span>
+                <select
+                  value={filterStatus}
+                  onChange={e => setFilterStatus(e.target.value)}
+                  className="select text-[13px] w-auto min-w-[140px]"
+                >
+                  <option value="">All Status</option>
+                  {statusOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Payment</span>
+                <select
+                  value={filterPayment}
+                  onChange={e => setFilterPayment(e.target.value)}
+                  className="select text-[13px] w-auto min-w-[140px]"
+                >
+                  <option value="">All Payments</option>
+                  <option value="paid">Paid</option>
+                  <option value="partial">Partial</option>
+                  <option value="unpaid">Unpaid</option>
+                </select>
+              </div>
+
+              {(filterAgent || filterStatus || filterPayment) && (
+                <button
+                  onClick={() => { setFilterAgent(''); setFilterStatus(''); setFilterPayment(''); }}
+                  className="flex items-center gap-1 text-[13px] text-primary font-medium hover:underline"
+                >
+                  <X size={14} /> Clear all
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-[#e0e0e0] overflow-hidden">
+      {/* Table */}
+      <div className="card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center h-48"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E74C3C]"></div></div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted">
+                  {['Passenger', 'Agent', 'Visa Type', 'Visa No', 'Total Charges', 'Received', 'Purchase Rate', 'Commission', 'Payment Status', 'Visa Status', ''].map(h => (
+                    <th key={h || 'act'} className="text-left px-4 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <SkeletonRows />
+            </table>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#e0e0e0]">
-                  {['Agent', 'Passenger', 'Visa Type', 'Visa No', 'Charges', 'Received', 'Dues', 'Commission', 'Status', 'Actions'].map(h => (
-                    <th key={h} className="text-left px-4 py-2.5 text-[11px] font-medium text-[#5f6368] uppercase tracking-wider">{h}</th>
+                <tr className="border-b border-border bg-muted">
+                  {['Passenger', 'Agent', 'Visa Type', 'Visa No', 'Total Charges', 'Received', 'Purchase Rate', 'Commission', 'Payment Status', 'Visa Status', ''].map(h => (
+                    <th key={h || 'act'} className="text-left px-4 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {visas.length === 0 ? (
-                  <tr><td colSpan={10} className="px-5 py-16 text-center">
-                    <Stamp size={48} className="mx-auto text-[#dadce0] mb-3" />
-                    <p className="text-[14px] text-[#5f6368]">No visa records found</p>
-                  </td></tr>
-                ) : visas.map((v) => (
-                  <tr key={v.id} className="border-b border-[#f0f0f0] last:border-0 gmail-row cursor-pointer" onClick={() => navigate(`/visas/${v.id}`)}>
-                    <td className="px-4 py-3 text-[13px] text-[#202124]">{v.agent_name}</td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-[#202124]">{v.passenger_name}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#5f6368] capitalize">{v.visa_type}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#5f6368]">{v.visa_number || '—'}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#202124]">PKR {v.total_charges.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#1e8e3e]">PKR {v.received.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#d93025] font-medium">{v.dues > 0 ? `PKR ${v.dues.toLocaleString()}` : '—'}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#1e8e3e] font-medium">PKR {v.commission.toLocaleString()}</td>
-                    <td className="px-4 py-3">
-                      <span className={`gmail-badge ${
-                        v.status === 'approved' ? 'bg-[#e6f4ea] text-[#1e8e3e]' :
-                        v.status === 'rejected' ? 'bg-[#fce8e6] text-[#d93025]' : 'bg-[#fef7e0] text-[#e37400]'
-                      }`}>{v.status}</span>
-                    </td>
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex gap-1">
-                        <button onClick={() => openEdit(v)} className="p-1.5 rounded-full hover:bg-[#f1f3f4]"><Edit2 size={16} className="text-[#5f6368]" /></button>
-                        <button onClick={() => handleDelete(v.id)} className="p-1.5 rounded-full hover:bg-[#fce8e6]"><Trash2 size={16} className="text-[#d93025]" /></button>
+                {filteredVisas.length === 0 ? (
+                  <tr>
+                    <td colSpan={11} className="px-5 py-20 text-center">
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                          <Stamp size={28} className="text-tertiary" />
+                        </div>
+                        <p className="text-[14px] font-medium text-primary mb-1">No visa records found</p>
+                        <p className="text-[13px] text-secondary mb-4">
+                          {search || filterAgent || filterStatus || filterPayment
+                            ? 'Try adjusting your search or filters'
+                            : 'Create your first visa record to get started'}
+                        </p>
+                        {!search && !filterAgent && !filterStatus && !filterPayment && (
+                          <button onClick={openAdd} className="btn btn-primary">
+                            <Plus size={16} /> New Visa
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredVisas.map(v => {
+                    const ps = paymentStatusBadge(v.total_charges, v.received);
+                    return (
+                      <tr
+                        key={v.id}
+                        className="border-b border-border last:border-0 table-row cursor-pointer transition-colors"
+                        onClick={() => navigate(`/visas/${v.id}`)}
+                      >
+                        <td className="px-4 py-3.5">
+                          <span className="text-[13px] font-medium text-primary">{v.passenger_name}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className="text-[13px] text-secondary">{v.agent_name || '—'}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className="text-[13px] text-secondary capitalize">{v.visa_type}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className="text-[13px] text-secondary font-mono">{v.visa_number || '—'}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className="text-[13px] font-semibold text-primary">{formatCurrency(v.total_charges)}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className="text-[13px] text-success font-medium">{formatCurrency(v.received)}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className="text-[13px] text-secondary">{formatCurrency(v.purchase_rate)}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className={`text-[13px] font-medium ${(v.commission || 0) > 0 ? 'text-success' : 'text-secondary'}`}>
+                            {formatCurrency(v.commission)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className={`badge ${ps.cls}`}>{ps.text}</span>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className={`badge ${statusBadgeClass[v.status] || statusBadgeClass.pending}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${statusOptions.find(s => s.value === v.status)?.dot || 'bg-warning'}`} />
+                            {v.status}
+                          </span>
+                        </td>
+                        <td className="px-2 py-3.5" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => openEdit(v)}
+                              className="p-1.5 rounded-lg hover:bg-hover transition-colors"
+                              title="Edit"
+                            >
+                              <Edit2 size={15} className="text-secondary" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(v.id)}
+                              className="p-1.5 rounded-lg hover:bg-danger-light transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 size={15} className="text-danger" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
         )}
       </div>
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? 'Edit Visa' : 'New Visa'} wide>
-        <form onSubmit={handleSubmit} className="space-y-5">
-
-          {/* 1. Passenger Information */}
-          <div className="border-t border-[#e0e0e0] pt-4">
-            <p className="text-[12px] font-medium text-[#E74C3C] uppercase tracking-wider mb-3">Passenger Information</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Input label="Passenger Name" required value={form.passenger_name} onChange={e => setForm({...form, passenger_name: e.target.value})} />
-            <Input label="Contact Number" value={form.contact_number} onChange={e => setForm({...form, contact_number: e.target.value})} />
-            <Input label="Passport Number" value={form.passport_number} onChange={e => setForm({...form, passport_number: e.target.value})} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Input label="Date of Birth" type="date" value={form.dob} onChange={e => setForm({...form, dob: e.target.value})} />
-            <Input label="Passport Expiry" type="date" value={form.passport_expiry} onChange={e => setForm({...form, passport_expiry: e.target.value})} />
-            <Input label="Occupation" value={form.occupation} onChange={e => setForm({...form, occupation: e.target.value})} />
-          </div>
-
-          {/* 2. Visa Details */}
-          <div className="border-t border-[#e0e0e0] pt-4">
-            <p className="text-[12px] font-medium text-[#E74C3C] uppercase tracking-wider mb-3">Visa Details</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Select label="Visa Type" value={form.visa_type} onChange={e => setForm({...form, visa_type: e.target.value})}>
-              {visaTypes.map(v => <option key={v} value={v.trim()}>{v.trim()}</option>)}
-            </Select>
-            <Input label="Visa Number" value={form.visa_number} onChange={e => setForm({...form, visa_number: e.target.value})} />
-            <Input label="Sponsor Number" value={form.sponsor_number} onChange={e => setForm({...form, sponsor_number: e.target.value})} />
-          </div>
-
-          {/* 3. Agent */}
-          <div className="border-t border-[#e0e0e0] pt-4">
-            <p className="text-[12px] font-medium text-[#E74C3C] uppercase tracking-wider mb-3">Agent</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Select label="Agent" required value={form.agent_id} onChange={e => setForm({...form, agent_id: e.target.value})}>
-              <option value="">Select Agent</option>
-              {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </Select>
-            <Select label="Status" value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </Select>
-          </div>
-
-          {/* 4. Visa Charges */}
-          <div className="border-t border-[#e0e0e0] pt-4">
-            <p className="text-[12px] font-medium text-[#E74C3C] uppercase tracking-wider mb-3">Visa Charges</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Visa Process Charges" type="number" step="0.01" min="0" value={form.visa_process_charges}
-              onChange={e => setForm({...form, visa_process_charges: e.target.value})} placeholder="0" />
-            <Input label="Medical Token Charges" type="number" step="0.01" min="0" value={form.medical_token_charges}
-              onChange={e => setForm({...form, medical_token_charges: e.target.value})} placeholder="0" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Agreement Paper Charges" type="number" step="0.01" min="0" value={form.agreement_paper_charges}
-              onChange={e => setForm({...form, agreement_paper_charges: e.target.value})} placeholder="0" />
-            <Input label="Extra Charges" type="number" step="0.01" min="0" value={form.extra_charges}
-              onChange={e => setForm({...form, extra_charges: e.target.value})} placeholder="0" />
-          </div>
-          <Input label="Total Charges" readOnly value={`PKR ${preview.total.toLocaleString()}`} />
-
-          {/* 5. Payment */}
-          <div className="border-t border-[#e0e0e0] pt-4">
-            <p className="text-[12px] font-medium text-[#E74C3C] uppercase tracking-wider mb-3">Payment</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Received" type="number" step="0.01" min="0" value={form.received}
-              onChange={e => setForm({...form, received: e.target.value})} placeholder="Amount received" />
-          </div>
-          <div className="bg-[#fef7e0] rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <span className="text-[13px] font-medium text-[#5f6368]">Dues (Total Charges - Received)</span>
-              <span className={`text-[16px] font-medium ${preview.dues > 0 ? 'text-[#d93025]' : 'text-[#1e8e3e]'}`}>
-                PKR {preview.dues.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-              </span>
+      {/* Add / Edit Modal */}
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? 'Edit Visa Record' : 'New Visa Record'} wide>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Section 1: Personal Info */}
+          <div>
+            <SectionHeader icon={User} title="Personal Information" color="bg-info" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <FormField label="Passenger Name" required>
+                <input
+                  className="input" placeholder="Full name"
+                  value={form.passenger_name} onChange={e => setForm({...form, passenger_name: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Passport Number">
+                <input
+                  className="input" placeholder="Passport number"
+                  value={form.passport_number} onChange={e => setForm({...form, passport_number: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Contact Number">
+                <input
+                  className="input" placeholder="Phone number"
+                  value={form.contact_number} onChange={e => setForm({...form, contact_number: e.target.value})}
+                />
+              </FormField>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+              <FormField label="Date of Birth">
+                <input
+                  type="date" className="input"
+                  value={form.dob} onChange={e => setForm({...form, dob: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Passport Expiry">
+                <input
+                  type="date" className="input"
+                  value={form.passport_expiry} onChange={e => setForm({...form, passport_expiry: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Occupation">
+                <input
+                  className="input" placeholder="Occupation"
+                  value={form.occupation} onChange={e => setForm({...form, occupation: e.target.value})}
+                />
+              </FormField>
             </div>
           </div>
 
-          {/* 6. Purchase & Profit */}
-          <div className="border-t border-[#e0e0e0] pt-4">
-            <p className="text-[12px] font-medium text-[#E74C3C] uppercase tracking-wider mb-3">Purchase & Profit</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Purchase Rate" type="number" step="0.01" min="0" value={form.purchase_rate}
-              onChange={e => setForm({...form, purchase_rate: e.target.value})} placeholder="Cost from supplier" />
-          </div>
-          <div className="bg-[#e6f4ea] rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <span className="text-[13px] font-medium text-[#5f6368]">Commission (Total Charges - Purchase Rate)</span>
-              <span className="text-[16px] font-medium text-[#1e8e3e]">
-                PKR {preview.commission.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-              </span>
+          {/* Section 2: Visa Info */}
+          <div>
+            <SectionHeader icon={FileText} title="Visa Information" color="bg-primary" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <FormField label="Visa Type" required>
+                <select
+                  className="select" value={form.visa_type}
+                  onChange={e => setForm({...form, visa_type: e.target.value})}
+                >
+                  {visaTypes.map(v => <option key={v} value={v.trim()}>{v.trim()}</option>)}
+                </select>
+              </FormField>
+              <FormField label="Visa Number">
+                <input
+                  className="input" placeholder="Visa number"
+                  value={form.visa_number} onChange={e => setForm({...form, visa_number: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Sponsor Number">
+                <input
+                  className="input" placeholder="Sponsor number"
+                  value={form.sponsor_number} onChange={e => setForm({...form, sponsor_number: e.target.value})}
+                />
+              </FormField>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-3 border-t border-[#e0e0e0]">
-            <button type="button" onClick={() => setModalOpen(false)} className="px-5 py-2.5 rounded-full text-[13px] font-medium text-[#5f6368] hover:bg-[#f1f3f4] transition-colors">Cancel</button>
-            <button type="submit" className="px-5 py-2.5 bg-[#E74C3C] text-white rounded-full text-[13px] font-medium hover:bg-[#C0392B] hover:shadow-[0_1px_3px_0_rgba(60,64,67,0.3)] transition-all">{editingId ? 'Update' : 'Create'}</button>
+          {/* Section 3: Agent & Charges */}
+          <div>
+            <SectionHeader icon={CreditCard} title="Agent & Charges" color="bg-warning" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <FormField label="Agent" required>
+                <select
+                  className="select" value={form.agent_id}
+                  onChange={e => setForm({...form, agent_id: e.target.value})}
+                >
+                  <option value="">Select Agent</option>
+                  {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              </FormField>
+              <FormField label="Status">
+                <select
+                  className="select" value={form.status}
+                  onChange={e => setForm({...form, status: e.target.value})}
+                >
+                  {statusOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </FormField>
+              <FormField label="Payment Method">
+                <select
+                  className="select" value={form.payment_method}
+                  onChange={e => setForm({...form, payment_method: e.target.value})}
+                >
+                  <option value="cash">Cash</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="online">Online</option>
+                  <option value="cheque">Cheque</option>
+                </select>
+              </FormField>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <FormField label="Visa Process Charges">
+                <input
+                  type="number" step="0.01" min="0" className="input" placeholder="0"
+                  value={form.visa_process_charges}
+                  onChange={e => setForm({...form, visa_process_charges: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Medical Token Charges">
+                <input
+                  type="number" step="0.01" min="0" className="input" placeholder="0"
+                  value={form.medical_token_charges}
+                  onChange={e => setForm({...form, medical_token_charges: e.target.value})}
+                />
+              </FormField>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <FormField label="Agreement Paper Charges">
+                <input
+                  type="number" step="0.01" min="0" className="input" placeholder="0"
+                  value={form.agreement_paper_charges}
+                  onChange={e => setForm({...form, agreement_paper_charges: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Extra Charges">
+                <input
+                  type="number" step="0.01" min="0" className="input" placeholder="0"
+                  value={form.extra_charges}
+                  onChange={e => setForm({...form, extra_charges: e.target.value})}
+                />
+              </FormField>
+            </div>
+          </div>
+
+          {/* Section 4: Cost & Profit */}
+          <div>
+            <SectionHeader icon={Calculator} title="Cost & Profit" color="bg-success" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <FormField label="Total Charges">
+                <input
+                  readOnly className="input input-readonly font-semibold"
+                  value={preview.total > 0 ? `PKR ${preview.total.toLocaleString()}` : 'PKR 0'}
+                />
+              </FormField>
+              <FormField label="Received Amount">
+                <input
+                  type="number" step="0.01" min="0" className="input" placeholder="Amount received"
+                  value={form.received}
+                  onChange={e => setForm({...form, received: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Purchase Rate">
+                <input
+                  type="number" step="0.01" min="0" className="input" placeholder="Cost from supplier"
+                  value={form.purchase_rate}
+                  onChange={e => setForm({...form, purchase_rate: e.target.value})}
+                />
+              </FormField>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <FormField label="Agent Commission %">
+                <input
+                  type="number" step="0.1" min="0" max="100" className="input" placeholder="0"
+                  value={form.agent_commission_percentage}
+                  onChange={e => setForm({...form, agent_commission_percentage: e.target.value})}
+                />
+              </FormField>
+              <FormField label="Commission (Auto-calculated)">
+                <input
+                  readOnly className="input input-readonly font-semibold"
+                  value={preview.total > 0 ? `PKR ${preview.commission.toLocaleString()}` : 'PKR 0'}
+                />
+              </FormField>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div className={`rounded-lg p-4 ${preview.total - (Number(form.received) || 0) > 0 ? 'bg-warning-light' : 'bg-success-light'}`}>
+                <div className="flex justify-between items-center">
+                  <span className="text-[12px] font-medium text-secondary uppercase tracking-wider">Dues</span>
+                  <span className={`text-[16px] font-semibold ${preview.total - (Number(form.received) || 0) > 0 ? 'text-danger' : 'text-success'}`}>
+                    {formatCurrency(preview.total - (Number(form.received) || 0))}
+                  </span>
+                </div>
+              </div>
+              <div className="rounded-lg p-4 bg-success-light">
+                <div className="flex justify-between items-center">
+                  <span className="text-[12px] font-medium text-secondary uppercase tracking-wider">Commission</span>
+                  <span className="text-[16px] font-semibold text-success">
+                    {formatCurrency(preview.commission)}
+                    {preview.total > 0 && (
+                      <span className="text-[11px] ml-1 font-normal">({preview.commissionPct}%)</span>
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <FormField label="Payment Remarks">
+              <textarea
+                className="input min-h-[60px] resize-none" placeholder="Optional payment notes"
+                value={form.payment_remarks} onChange={e => setForm({...form, payment_remarks: e.target.value})}
+              />
+            </FormField>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <button type="button" onClick={() => setModalOpen(false)} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary">
+              {editingId ? 'Update Visa' : 'Create Visa'}
+            </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Delete Visa Record">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-danger-light">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-danger flex items-center justify-center">
+              <Trash2 size={18} className="text-white" />
+            </div>
+            <div>
+              <p className="text-[14px] font-medium text-primary">Are you sure?</p>
+              <p className="text-[13px] text-secondary mt-0.5">
+                This visa record will be permanently deleted. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setDeleteConfirm(null)} className="btn btn-secondary">
+              Cancel
+            </button>
+            <button onClick={() => handleDelete(deleteConfirm)} className="btn btn-danger">
+              <Trash2 size={15} /> Delete
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

@@ -51,6 +51,7 @@ def _build_out(visa, agent_name=""):
         dues=visa.dues or 0,
         purchase_rate=visa.purchase_rate or 0,
         commission=visa.commission or 0,
+        agent_commission_percentage=visa.agent_commission_percentage or 0,
         status=visa.status or "pending",
         created_at=visa.created_at,
         agent_name=agent_name,

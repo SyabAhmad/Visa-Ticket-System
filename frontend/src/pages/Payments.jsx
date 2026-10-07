@@ -67,76 +67,71 @@ export default function Payments() {
     else navigate(`/visas/${r.id}`);
   };
 
+  const activeFilters = [filterAgent, filterType].filter(Boolean).length;
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-[22px] font-normal text-[#202124]">Payment Ledger</h1>
-          <p className="text-[13px] text-[#5f6368] mt-0.5">{payments.length} payment{payments.length !== 1 ? 's' : ''} recorded</p>
+          <h1 className="text-[22px] font-semibold text-primary">Payment Ledger</h1>
+          <p className="text-[13px] text-secondary mt-0.5">{payments.length} payment{payments.length !== 1 ? 's' : ''} recorded</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={exportCSV} className="flex items-center gap-2 bg-white border border-[#dadce0] text-[#5f6368] px-4 py-2.5 rounded-full text-[13px] font-medium hover:bg-[#f1f3f4] transition-all">
-            <Download size={16} /> Export CSV
-          </button>
-        </div>
+        <button onClick={exportCSV} className="btn btn-secondary">
+          <Download size={16} /> Export CSV
+        </button>
       </div>
 
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-5 hover:shadow-[0_1px_3px_0_rgba(60,64,67,0.3)] transition-shadow">
-            <p className="text-[12px] text-[#5f6368] uppercase tracking-wide font-medium">Total Expected</p>
-            <p className="text-[22px] font-normal text-[#202124] mt-1">PKR {(summary.total_expected || 0).toLocaleString()}</p>
+          <div className="card p-5 card-hover">
+            <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Total Expected</p>
+            <p className="text-[22px] font-semibold text-primary mt-1.5">PKR {(summary.total_expected || 0).toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-5 hover:shadow-[0_1px_3px_0_rgba(60,64,67,0.3)] transition-shadow">
-            <p className="text-[12px] text-[#5f6368] uppercase tracking-wide font-medium">Total Received</p>
-            <p className="text-[22px] font-normal text-[#1e8e3e] mt-1">PKR {(summary.total_received || 0).toLocaleString()}</p>
+          <div className="card p-5 card-hover">
+            <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Total Received</p>
+            <p className="text-[22px] font-semibold text-success mt-1.5">PKR {(summary.total_received || 0).toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-5 hover:shadow-[0_1px_3px_0_rgba(60,64,67,0.3)] transition-shadow">
-            <p className="text-[12px] text-[#5f6368] uppercase tracking-wide font-medium">Total Dues</p>
-            <p className="text-[22px] font-normal text-[#d93025] mt-1">PKR {(summary.total_dues || 0).toLocaleString()}</p>
+          <div className="card p-5 card-hover">
+            <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Total Dues</p>
+            <p className="text-[22px] font-semibold text-danger mt-1.5">PKR {(summary.total_dues || 0).toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-5 hover:shadow-[0_1px_3px_0_rgba(60,64,67,0.3)] transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <p className="text-[12px] text-[#5f6368] uppercase tracking-wide font-medium">By Type</p>
-                <div className="flex gap-3 mt-1.5">
-                  <span className="text-[12px] text-[#5f6368]">Tickets: <span className="text-[#202124] font-medium">PKR {(summary.ticket_received || 0).toLocaleString()}</span></span>
-                </div>
-                <div className="flex gap-3 mt-0.5">
-                  <span className="text-[12px] text-[#5f6368]">Visas: <span className="text-[#202124] font-medium">PKR {(summary.visa_received || 0).toLocaleString()}</span></span>
-                </div>
-              </div>
+          <div className="card p-5 card-hover">
+            <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">By Type</p>
+            <div className="mt-1.5 space-y-0.5">
+              <p className="text-[13px] text-secondary">Tickets: <span className="text-primary font-medium">PKR {(summary.ticket_received || 0).toLocaleString()}</span></p>
+              <p className="text-[13px] text-secondary">Visas: <span className="text-primary font-medium">PKR {(summary.visa_received || 0).toLocaleString()}</span></p>
             </div>
           </div>
         </div>
       )}
 
       {/* Search & Filter */}
-      <div className="bg-white rounded-xl border border-[#e0e0e0] mb-4 overflow-hidden">
+      <div className="card mb-4 overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex-1 flex items-center gap-2 bg-[#f1f3f4] rounded-full px-4 py-2">
-            <Search size={18} className="text-[#5f6368]" />
-            <input type="text" placeholder="Search by passenger name or booking ref..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-transparent outline-none text-[13px] text-[#202124] placeholder:text-[#5f6368]" />
-            {search && <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-[#e8eaed]"><X size={16} className="text-[#5f6368]" /></button>}
+          <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-4 py-2">
+            <Search size={18} className="text-secondary" />
+            <input type="text" placeholder="Search by passenger name or booking ref..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-transparent outline-none text-[13px] text-primary placeholder:text-tertiary" />
+            {search && <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-hover"><X size={16} className="text-tertiary" /></button>}
           </div>
-          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors ${showFilters ? 'bg-[#f0f0f0] text-[#E74C3C]' : 'text-[#5f6368] hover:bg-[#f1f3f4]'}`}>
+          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors relative ${showFilters ? 'bg-hover text-primary' : 'text-secondary hover:bg-muted'}`}>
             <Filter size={16} /><span>Filter</span>
+            {activeFilters > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white rounded-full text-[10px] flex items-center justify-center">{activeFilters}</span>}
           </button>
         </div>
         {showFilters && (
-          <div className="px-4 pb-3 flex items-center gap-3 border-t border-[#f0f0f0] pt-3">
-            <select value={filterAgent} onChange={(e) => setFilterAgent(e.target.value)} className="px-3 py-2 border border-[#dadce0] rounded-lg text-[13px] focus:ring-0 outline-none bg-white">
+          <div className="px-4 pb-3 flex items-center gap-3 border-t border-border pt-3">
+            <select value={filterAgent} onChange={(e) => setFilterAgent(e.target.value)} className="select w-auto">
               <option value="">All Agents</option>
               {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="px-3 py-2 border border-[#dadce0] rounded-lg text-[13px] focus:ring-0 outline-none bg-white">
+            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="select w-auto">
               <option value="">All Types</option>
               <option value="ticket">Tickets</option>
               <option value="visa">Visas</option>
             </select>
-            {(filterAgent || filterType) && (
-              <button onClick={() => { setFilterAgent(''); setFilterType(''); }} className="flex items-center gap-1 text-[13px] text-[#E74C3C] hover:underline">
+            {activeFilters > 0 && (
+              <button onClick={() => { setFilterAgent(''); setFilterType(''); }} className="flex items-center gap-1 text-[13px] text-primary hover:underline">
                 <X size={14} /> Clear
               </button>
             )}
@@ -145,45 +140,50 @@ export default function Payments() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#e0e0e0] overflow-hidden">
+      <div className="card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center h-48"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E74C3C]"></div></div>
+          <div className="flex items-center justify-center h-48">
+            <div className="flex flex-col items-center gap-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-sm text-secondary">Loading payments...</p>
+            </div>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#e0e0e0]">
+                <tr className="border-b border-border">
                   {['Type', 'Passenger', 'Agent', 'Booking Ref', 'Total', 'Received', 'Dues', 'Method', 'Remarks'].map(h => (
-                    <th key={h} className="text-left px-4 py-2.5 text-[11px] font-medium text-[#5f6368] uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left px-4 py-2.5 text-[11px] font-medium text-secondary uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {payments.length === 0 ? (
                   <tr><td colSpan={9} className="px-5 py-16 text-center">
-                    <Banknote size={48} className="mx-auto text-[#dadce0] mb-3" />
-                    <p className="text-[14px] text-[#5f6368]">No payments found</p>
+                    <Banknote size={48} className="mx-auto text-tertiary mb-3" />
+                    <p className="text-[14px] text-secondary">No payments found</p>
                   </td></tr>
                 ) : payments.map((r, i) => (
-                  <tr key={`${r.type}-${r.id}-${i}`} className="border-b border-[#f0f0f0] last:border-0 gmail-row cursor-pointer" onClick={() => handleClick(r)}>
+                  <tr key={`${r.type}-${r.id}-${i}`} className="table-row cursor-pointer" onClick={() => handleClick(r)}>
                     <td className="px-4 py-3">
-                      <span className={`gmail-badge flex items-center gap-1 w-fit ${r.type === 'ticket' ? 'bg-[#e8f0fe] text-[#1a73e8]' : 'bg-[#fef7e0] text-[#e37400]'}`}>
+                      <span className={`badge ${r.type === 'ticket' ? 'bg-info-light text-info' : 'bg-warning-light text-warning'}`}>
                         {r.type === 'ticket' ? <Ticket size={12} /> : <Stamp size={12} />}
                         {r.type === 'ticket' ? 'Ticket' : 'Visa'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-[#202124]">{r.passenger_name}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#5f6368]">{r.agent_name || '—'}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#5f6368]">{r.booking_ref || '—'}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#202124]">PKR {(r.total_amount || 0).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#1e8e3e] font-medium">PKR {(r.received || 0).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-[13px] text-[#d93025] font-medium">{(r.dues || 0) > 0 ? `PKR ${(r.dues || 0).toLocaleString()}` : '—'}</td>
+                    <td className="px-4 py-3 text-[13px] text-primary font-medium">{r.passenger_name}</td>
+                    <td className="px-4 py-3 text-[13px] text-secondary">{r.agent_name || '—'}</td>
+                    <td className="px-4 py-3 text-[13px] text-secondary">{r.booking_ref || '—'}</td>
+                    <td className="px-4 py-3 text-[13px] text-primary font-medium">PKR {(r.total_amount || 0).toLocaleString()}</td>
+                    <td className="px-4 py-3 text-[13px] text-success font-semibold">PKR {(r.received || 0).toLocaleString()}</td>
+                    <td className="px-4 py-3 text-[13px] text-danger font-semibold">{(r.dues || 0) > 0 ? `PKR ${(r.dues || 0).toLocaleString()}` : '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`gmail-badge ${r.payment_method === 'cash' ? 'bg-[#fef7e0] text-[#e37400]' : 'bg-[#f0f0f0] text-[#E74C3C]'}`}>
+                      <span className={`badge ${r.payment_method === 'cash' ? 'bg-warning-light text-warning' : 'bg-muted text-secondary'}`}>
                         {r.payment_method === 'cash' ? 'Cash' : 'Bank'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[13px] text-[#5f6368] max-w-[150px] truncate">{r.payment_remarks || '—'}</td>
+                    <td className="px-4 py-3 text-[13px] text-secondary max-w-[150px] truncate">{r.payment_remarks || '—'}</td>
                   </tr>
                 ))}
               </tbody>

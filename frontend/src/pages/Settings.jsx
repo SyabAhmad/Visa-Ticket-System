@@ -120,7 +120,7 @@ export default function Settings() {
     <div className="flex items-center justify-center h-64">
       <div className="flex flex-col items-center gap-3">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-sm text-secondary">Loading settings...</p>
+        <p className="text-sm text-muted-foreground">Loading settings...</p>
       </div>
     </div>
   );
@@ -128,7 +128,7 @@ export default function Settings() {
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-[22px] font-semibold text-primary mb-1">Settings</h1>
-      <p className="text-[13px] text-secondary mb-6">Manage dropdown values and system data</p>
+      <p className="text-[13px] text-muted-foreground mb-6">Manage dropdown values and system data</p>
 
       {/* Password Change Section */}
       <div className="card overflow-hidden mb-6">
@@ -138,7 +138,7 @@ export default function Settings() {
           </div>
           <div>
             <h3 className="text-[15px] font-semibold text-primary">Change Password</h3>
-            <p className="text-[12px] text-secondary">Update your account password</p>
+            <p className="text-[12px] text-muted-foreground">Update your account password</p>
           </div>
         </div>
         <form onSubmit={handleChangePassword} className="p-6">
@@ -171,7 +171,7 @@ export default function Settings() {
           </div>
           <div>
             <h3 className="text-[15px] font-semibold text-primary">Data Backup</h3>
-            <p className="text-[12px] text-secondary">Export or import your database</p>
+            <p className="text-[12px] text-muted-foreground">Export or import your database</p>
           </div>
         </div>
 
@@ -179,12 +179,12 @@ export default function Settings() {
           {backupStats && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <div className="bg-muted rounded-lg p-3 text-center">
-                <p className="text-[11px] text-secondary uppercase tracking-wider">DB Size</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider">DB Size</p>
                 <p className="text-[16px] font-semibold text-primary">{backupStats.db_size_formatted}</p>
               </div>
               {Object.entries(backupStats.records).slice(0, 3).map(([key, val]) => (
                 <div key={key} className="bg-muted rounded-lg p-3 text-center">
-                  <p className="text-[11px] text-secondary uppercase tracking-wider">{key}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{key}</p>
                   <p className="text-[16px] font-semibold text-primary">{val}</p>
                 </div>
               ))}
@@ -204,11 +204,11 @@ export default function Settings() {
 
           {backupStats?.backups?.length > 0 && (
             <div className="mt-6 pt-4 border-t border-border">
-              <h4 className="text-[13px] font-semibold text-secondary uppercase tracking-wider mb-3">Previous Backups</h4>
+              <h4 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Previous Backups</h4>
               <div className="space-y-2">
                 {backupStats.backups.slice(0, 5).map((b, i) => (
                   <div key={i} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                    <Clock size={16} className="text-secondary" />
+                    <Clock size={16} className="text-muted-foreground" />
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] text-primary">{b.filename}</p>
                       <p className="text-[11px] text-tertiary">{new Date(b.date).toLocaleString()}</p>
@@ -229,7 +229,7 @@ export default function Settings() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="text-[15px] font-semibold text-primary">{label}</h3>
-                <p className="text-[12px] text-secondary">{description}</p>
+                <p className="text-[12px] text-muted-foreground">{description}</p>
               </div>
               <button onClick={() => handleSave(key)} className="btn btn-primary">
                 <Save size={14} /> Save
@@ -248,7 +248,7 @@ export default function Settings() {
                   </button>
                 </div>
               ))}
-              <button onClick={() => addListItem(key)} className="flex items-center gap-1 border border-dashed border-strong rounded-full px-3 py-1.5 text-[13px] text-secondary hover:border-primary hover:text-primary transition-colors">
+              <button onClick={() => addListItem(key)} className="flex items-center gap-1 border border-dashed border-strong rounded-full px-3 py-1.5 text-[13px] text-muted-foreground hover:border-primary hover:text-primary transition-colors">
                 <Plus size={14} /> Add
               </button>
             </div>
@@ -258,3 +258,4 @@ export default function Settings() {
     </div>
   );
 }
+

@@ -19,14 +19,14 @@ const periods = [
 
 function StatCard({ icon: Icon, label, value, color, onClick, subtitle }) {
   return (
-    <div onClick={onClick} className="card card-hover p-5 cursor-pointer group">
+    <div onClick={onClick} className="card card-hover p-3 cursor-pointer group">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">{label}</p>
-          <p className="text-[22px] font-semibold text-primary mt-1.5 truncate">{value}</p>
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{label}</p>
+          <p className="text-[18px] font-semibold text-primary mt-1 truncate">{value}</p>
           {subtitle && <p className="text-[11px] text-tertiary mt-1">{subtitle}</p>}
         </div>
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: `${color}15` }}>
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: `${color}15` }}>
           <Icon size={20} style={{ color }} />
         </div>
       </div>
@@ -73,14 +73,14 @@ export default function Dashboard() {
   if (loading && !stats) return (
     <div className="flex items-center justify-center h-64">
       <div className="flex flex-col items-center gap-3">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-sm text-secondary">Loading dashboard...</p>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
       </div>
     </div>
   );
 
   if (error && !stats) return (
-    <div className="card border-danger bg-danger-light px-4 py-3 text-[13px] text-danger">
+    <div className="card border-danger bg-danger-light px-3 py-2 text-[12px] text-danger">
       {error}
     </div>
   );
@@ -89,17 +89,18 @@ export default function Dashboard() {
   const totalPassengers = (stats?.total_tickets || 0) + (stats?.total_visas || 0);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3" style={{ backgroundColor: '#ffffff', padding: '10px 12px', borderRadius: '6px', border: '1px solid #dadce0' }}>
         <div>
-          <h1 className="text-[22px] font-semibold text-primary">Dashboard</h1>
-          <p className="text-[13px] text-secondary mt-0.5">Welcome back, {user?.full_name || user?.username || 'User'}</p>
+          <h1 className="text-[16px] font-semibold" style={{ color: '#202124' }}>Dashboard</h1>
+          <p className="text-[12px] mt-0.5" style={{ color: '#5f6368' }}>Welcome back, {user?.full_name || user?.username || 'User'}</p>
         </div>
-        <div className="flex gap-1 bg-card rounded-full border border-border p-1">
+        <div className="flex gap-1 rounded-md p-1" style={{ backgroundColor: '#f1f3f4', border: '1px solid #dadce0' }}>
           {periods.map(p => (
             <button key={p.value} onClick={() => setPeriod(p.value)}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all ${period === p.value ? 'bg-primary text-white shadow-sm' : 'text-secondary hover:bg-hover'}`}>
+              style={{ backgroundColor: period === p.value ? '#D97706' : 'transparent', color: period === p.value ? '#ffffff' : '#202124' }}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${period === p.value ? 'shadow-xs' : 'hover:bg-[#D97706]/10'}`}>
               {p.label}
             </button>
           ))}
@@ -108,91 +109,91 @@ export default function Dashboard() {
 
       {/* Alert Banners */}
       {(alerts.passport.count > 0 || alerts.payments.count > 0) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {alerts.passport.count > 0 && (
-            <div className="card bg-warning-light border-warning p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle size={18} className="text-warning" />
-                <span className="text-[13px] font-medium text-warning">Passport Expiry Alerts</span>
+            <div className="card bg-warning-light border-warning p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle size={16} className="text-warning" />
+                <span className="text-[12px] font-medium text-warning">Passport Expiry Alerts</span>
               </div>
-              <p className="text-[12px] text-secondary">{alerts.passport.count} passport(s) expiring within 30 days</p>
-              <button onClick={() => navigate('/tickets')} className="text-[12px] text-primary mt-1 hover:underline font-medium">View Details →</button>
+              <p className="text-[11px] text-muted-foreground">{alerts.passport.count} passport(s) expiring within 30 days</p>
+              <button onClick={() => navigate('/tickets')} className="text-[11px] text-primary mt-1 hover:underline font-medium">View Details →</button>
             </div>
           )}
           {alerts.payments.count > 0 && (
-            <div className="card bg-danger-light border-danger p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle size={18} className="text-danger" />
-                <span className="text-[13px] font-medium text-danger">Pending Payments</span>
+            <div className="card bg-danger-light border-danger p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle size={16} className="text-danger" />
+                <span className="text-[12px] font-medium text-danger">Pending Payments</span>
               </div>
-              <p className="text-[12px] text-secondary">{alerts.payments.count} record(s) — PKR {(alerts.payments.total_due || 0).toLocaleString()} due</p>
-              <button onClick={() => navigate('/payments')} className="text-[12px] text-primary mt-1 hover:underline font-medium">View Details →</button>
+              <p className="text-[11px] text-muted-foreground">{alerts.payments.count} record(s) — PKR {(alerts.payments.total_due || 0).toLocaleString()} due</p>
+              <button onClick={() => navigate('/payments')} className="text-[11px] text-primary mt-1 hover:underline font-medium">View Details →</button>
             </div>
           )}
         </div>
       )}
 
       {/* Primary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <StatCard icon={Users} label="Total Passengers" value={totalPassengers} color="var(--primary)" onClick={() => navigate('/tickets')} subtitle="Tickets + Visas" />
         <StatCard icon={Ticket} label="Total Tickets" value={stats.total_tickets} color="var(--info)" onClick={() => navigate('/tickets')} subtitle="Flight bookings" />
         <StatCard icon={Stamp} label="Total Visas" value={stats.total_visas} color="var(--warning)" onClick={() => navigate('/visas')} subtitle="Visa bookings" />
       </div>
 
       {/* Financial Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="card p-5 border border-success/20 bg-success-light/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-success flex items-center justify-center">
-              <CircleDollarSign size={20} className="text-white" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="card p-3 border border-success/20 bg-success-light/30">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-md bg-success flex items-center justify-center">
+              <CircleDollarSign size={16} className="text-white" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Total Received</p>
-              <p className="text-[18px] font-semibold text-success mt-0.5">PKR {(stats.total_received || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Total Received</p>
+              <p className="text-[16px] font-semibold text-success mt-0.5">PKR {(stats.total_received || 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
-        <div className="card p-5 border border-danger/20 bg-danger-light/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-danger flex items-center justify-center">
-              <AlertTriangle size={20} className="text-white" />
+        <div className="card p-3 border border-danger/20 bg-danger-light/30">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-md bg-danger flex items-center justify-center">
+              <AlertTriangle size={16} className="text-white" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Total Dues</p>
-              <p className="text-[18px] font-semibold text-danger mt-0.5">PKR {(stats.total_dues || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Total Dues</p>
+              <p className="text-[16px] font-semibold text-danger mt-0.5">PKR {(stats.total_dues || 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
-        <div className="card p-5 border border-warning/20 bg-warning-light/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-warning flex items-center justify-center">
-              <TrendingUp size={20} className="text-white" />
+        <div className="card p-3 border border-warning/20 bg-warning-light/30">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-md bg-warning flex items-center justify-center">
+              <TrendingUp size={16} className="text-white" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Agent Commission</p>
-              <p className="text-[18px] font-semibold text-warning mt-0.5">PKR {(stats.agent_commission || 0).toLocaleString()}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Agent Commission</p>
+              <p className="text-[16px] font-semibold text-warning mt-0.5">PKR {(stats.agent_commission || 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* MY COMMISSION Card */}
-      <div className="card p-5 border-2 border-primary/20 bg-primary/5">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-            <Wallet size={24} className="text-white" />
+      <div className="card p-3 border-2 border-primary/20 bg-primary/5">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
+            <Wallet size={20} className="text-white" />
           </div>
           <div className="flex-1">
-            <p className="text-[12px] text-secondary uppercase tracking-wider font-medium">My Commission (Business Profit)</p>
-            <p className="text-[28px] font-bold text-primary mt-1">PKR {(stats.my_commission || 0).toLocaleString()}</p>
-            <div className="flex gap-6 mt-3">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">My Commission (Business Profit)</p>
+            <p className="text-[24px] font-bold text-primary mt-1">PKR {(stats.my_commission || 0).toLocaleString()}</p>
+            <div className="flex gap-4 mt-2">
               <div>
-                <p className="text-[11px] text-tertiary">Ticket Profit</p>
-                <p className="text-[14px] font-semibold text-primary">PKR {(stats.ticket_profit || 0).toLocaleString()}</p>
+                <p className="text-[10px] text-tertiary">Ticket Profit</p>
+                <p className="text-[12px] font-semibold text-primary">PKR {(stats.ticket_profit || 0).toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-[11px] text-tertiary">Visa Profit</p>
-                <p className="text-[14px] font-semibold text-primary">PKR {(stats.visa_profit || 0).toLocaleString()}</p>
+                <p className="text-[10px] text-tertiary">Visa Profit</p>
+                <p className="text-[12px] font-semibold text-primary">PKR {(stats.visa_profit || 0).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -200,14 +201,14 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Monthly Revenue Chart */}
-        <div className="lg:col-span-2 card p-5">
+        <div className="lg:col-span-2 card p-3">
           <div className="section-header">
-            <TrendingUp size={18} className="text-primary" />
+            <TrendingUp size={16} className="text-primary" />
             <h3>Monthly Revenue</h3>
           </div>
-          <div className="flex items-end gap-2 md:gap-3 h-44">
+          <div className="flex items-end gap-2 md:gap-3 h-36">
             {(stats?.monthly_revenue || []).map((m, i) => {
               const height = maxRevenue > 0 ? (m.revenue / maxRevenue) * 100 : 0;
               return (
@@ -222,21 +223,21 @@ export default function Dashboard() {
         </div>
 
         {/* Top Agents */}
-        <div className="card p-5">
+        <div className="card p-3">
           <div className="section-header">
-            <Users size={18} className="text-primary" />
+            <Users size={16} className="text-primary" />
             <h3>Top Agents</h3>
           </div>
           {(stats?.top_agents || []).length === 0 ? (
-            <p className="text-[13px] text-secondary text-center py-8">No agent data yet</p>
+            <p className="text-[12px] text-muted-foreground text-center py-6">No agent data yet</p>
           ) : (
             <div className="space-y-2">
               {(stats?.top_agents || []).map((a, i) => (
-                <div key={a.id} onClick={() => navigate(`/agents/${a.id}`)} className="flex items-center gap-3 cursor-pointer hover:bg-hover p-2.5 rounded-lg transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-[12px] font-medium flex-shrink-0">{i + 1}</div>
+                <div key={a.id} onClick={() => navigate(`/agents/${a.id}`)} className="flex items-center gap-2 cursor-pointer hover:bg-hover p-2 rounded-md transition-colors">
+                  <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-[11px] font-medium flex-shrink-0">{i + 1}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-primary truncate">{a.name}</p>
-                    <p className="text-[11px] text-tertiary">PKR {(a.revenue || 0).toLocaleString()}</p>
+                    <p className="text-[12px] font-medium text-primary truncate">{a.name}</p>
+                    <p className="text-[10px] text-tertiary">PKR {(a.revenue || 0).toLocaleString()}</p>
                   </div>
                   <ArrowRight size={14} className="text-tertiary flex-shrink-0" />
                 </div>
@@ -247,24 +248,24 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Recent Tickets */}
         <div className="card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-            <h3 className="text-[14px] font-semibold text-primary">Recent Bookings</h3>
-            <button onClick={() => navigate('/tickets')} className="text-[12px] text-primary hover:underline font-medium">View All</button>
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
+            <h3 className="text-[12px] font-semibold text-primary">Recent Bookings</h3>
+            <button onClick={() => navigate('/tickets')} className="text-[11px] text-primary hover:underline font-medium">View All</button>
           </div>
           <div className="divide-y divide-default">
             {(!stats?.recent_tickets || stats.recent_tickets.length === 0) ? (
-              <p className="px-5 py-8 text-center text-[13px] text-tertiary">No bookings yet</p>
+              <p className="px-4 py-6 text-center text-[12px] text-tertiary">No bookings yet</p>
             ) : stats.recent_tickets.map(t => (
-              <div key={t.id} onClick={() => navigate(`/tickets/${t.id}`)} className="flex items-center justify-between px-5 py-3.5 cursor-pointer hover:bg-hover transition-colors">
+              <div key={t.id} onClick={() => navigate(`/tickets/${t.id}`)} className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-hover transition-colors">
                 <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-primary truncate">{t.passenger_name}</p>
-                  <p className="text-[11px] text-tertiary">{t.sector} · {t.agent_name}</p>
+                  <p className="text-[12px] font-medium text-primary truncate">{t.passenger_name}</p>
+                  <p className="text-[10px] text-tertiary">{t.sector} · {t.agent_name}</p>
                 </div>
                 <div className="text-right flex-shrink-0 ml-3">
-                  <p className="text-[13px] font-medium text-primary">PKR {(t.total_payment || 0).toLocaleString()}</p>
+                  <p className="text-[12px] font-medium text-primary">PKR {(t.total_payment || 0).toLocaleString()}</p>
                   <span className={`badge ${t.payment_status === 'paid' ? 'bg-success-light text-success' : 'bg-warning-light text-warning'}`}>{t.payment_status}</span>
                 </div>
               </div>
@@ -274,21 +275,21 @@ export default function Dashboard() {
 
         {/* Recent Visas */}
         <div className="card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-            <h3 className="text-[14px] font-semibold text-primary">Recent Visas</h3>
-            <button onClick={() => navigate('/visas')} className="text-[12px] text-primary hover:underline font-medium">View All</button>
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
+            <h3 className="text-[12px] font-semibold text-primary">Recent Visas</h3>
+            <button onClick={() => navigate('/visas')} className="text-[11px] text-primary hover:underline font-medium">View All</button>
           </div>
           <div className="divide-y divide-default">
             {(!stats?.recent_visas || stats.recent_visas.length === 0) ? (
-              <p className="px-5 py-8 text-center text-[13px] text-tertiary">No visa records yet</p>
+              <p className="px-4 py-6 text-center text-[12px] text-tertiary">No visa records yet</p>
             ) : stats.recent_visas.map(v => (
-              <div key={v.id} onClick={() => navigate(`/visas/${v.id}`)} className="flex items-center justify-between px-5 py-3.5 cursor-pointer hover:bg-hover transition-colors">
+              <div key={v.id} onClick={() => navigate(`/visas/${v.id}`)} className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-hover transition-colors">
                 <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-primary truncate">{v.passenger_name}</p>
-                  <p className="text-[11px] text-tertiary">{v.visa_type} · {v.agent_name}</p>
+                  <p className="text-[12px] font-medium text-primary truncate">{v.passenger_name}</p>
+                  <p className="text-[10px] text-tertiary">{v.visa_type} · {v.agent_name}</p>
                 </div>
                 <div className="text-right flex-shrink-0 ml-3">
-                  <p className="text-[13px] font-medium text-primary">PKR {(v.total_charges || 0).toLocaleString()}</p>
+                  <p className="text-[12px] font-medium text-primary">PKR {(v.total_charges || 0).toLocaleString()}</p>
                   <span className={`badge ${v.status === 'approved' ? 'bg-success-light text-success' : v.status === 'rejected' ? 'bg-danger-light text-danger' : 'bg-warning-light text-warning'}`}>{v.status}</span>
                 </div>
               </div>
@@ -299,3 +300,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

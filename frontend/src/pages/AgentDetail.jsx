@@ -51,7 +51,7 @@ export default function AgentDetail() {
     <div className="flex items-center justify-center h-64">
       <div className="flex flex-col items-center gap-3">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-sm text-secondary">Loading agent...</p>
+        <p className="text-sm text-muted-foreground">Loading agent...</p>
       </div>
     </div>
   );
@@ -65,11 +65,11 @@ export default function AgentDetail() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button onClick={() => navigate('/agents')} className="p-2 rounded-lg hover:bg-hover transition-colors">
-          <ArrowLeft size={20} className="text-secondary" />
+          <ArrowLeft size={20} className="text-muted-foreground" />
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="text-[22px] font-semibold text-primary">Agent Details</h1>
-          <p className="text-[13px] text-secondary mt-0.5">{agent.name}</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">{agent.name}</p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button onClick={() => navigate('/agents', { state: { editId: agent.id } })} className="btn btn-secondary">
@@ -103,28 +103,28 @@ export default function AgentDetail() {
         <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-              <Phone size={16} className="text-secondary" />
+              <Phone size={16} className="text-muted-foreground" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Phone</p>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Phone</p>
               <p className="text-[13px] text-primary">{agent.phone || '—'}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-              <Mail size={16} className="text-secondary" />
+              <Mail size={16} className="text-muted-foreground" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Email</p>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Email</p>
               <p className="text-[13px] text-primary">{agent.email || '—'}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-              <Percent size={16} className="text-secondary" />
+              <Percent size={16} className="text-muted-foreground" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Commission Rate</p>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Commission Rate</p>
               <p className="text-[13px] text-primary">{agent.commission_rate}%</p>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function AgentDetail() {
                 <s.icon size={18} className={`text-${s.color}`} />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">{s.label}</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{s.label}</p>
                 <p className="text-[16px] font-semibold text-primary truncate">{s.value}</p>
               </div>
             </div>
@@ -164,7 +164,7 @@ export default function AgentDetail() {
             <thead>
               <tr className="border-b border-border">
                 {['Passenger', 'Route', 'Amount', 'Status'].map(h => (
-                  <th key={h} className="text-left px-5 py-2.5 text-[11px] font-medium text-secondary uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-5 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -174,7 +174,7 @@ export default function AgentDetail() {
               ) : tickets.slice(0, 5).map(t => (
                 <tr key={t.id} className="table-row cursor-pointer" onClick={() => navigate(`/tickets/${t.id}`)}>
                   <td className="px-5 py-3 text-[13px] text-primary font-medium">{t.passenger_name}</td>
-                  <td className="px-5 py-3 text-[13px] text-secondary">{t.sector}</td>
+                  <td className="px-5 py-3 text-[13px] text-muted-foreground">{t.sector}</td>
                   <td className="px-5 py-3 text-[13px] text-primary font-medium">PKR {(t.total_payment || 0).toLocaleString()}</td>
                   <td className="px-5 py-3">
                     <span className={`badge ${t.payment_status === 'paid' ? 'bg-success-light text-success' : 'bg-warning-light text-warning'}`}>{t.payment_status}</span>
@@ -197,7 +197,7 @@ export default function AgentDetail() {
             <thead>
               <tr className="border-b border-border">
                 {['Passenger', 'Type', 'Charges', 'Status'].map(h => (
-                  <th key={h} className="text-left px-5 py-2.5 text-[11px] font-medium text-secondary uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-5 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -207,7 +207,7 @@ export default function AgentDetail() {
               ) : visas.slice(0, 5).map(v => (
                 <tr key={v.id} className="table-row cursor-pointer" onClick={() => navigate(`/visas/${v.id}`)}>
                   <td className="px-5 py-3 text-[13px] text-primary font-medium">{v.passenger_name}</td>
-                  <td className="px-5 py-3 text-[13px] text-secondary capitalize">{v.visa_type}</td>
+                  <td className="px-5 py-3 text-[13px] text-muted-foreground capitalize">{v.visa_type}</td>
                   <td className="px-5 py-3 text-[13px] text-primary font-medium">PKR {(v.total_charges || 0).toLocaleString()}</td>
                   <td className="px-5 py-3">
                     <span className={`badge ${v.status === 'approved' ? 'bg-success-light text-success' : v.status === 'rejected' ? 'bg-danger-light text-danger' : 'bg-warning-light text-warning'}`}>{v.status}</span>
@@ -221,3 +221,4 @@ export default function AgentDetail() {
     </div>
   );
 }
+

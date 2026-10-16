@@ -35,7 +35,7 @@ export default function Login() {
         className="absolute top-6 right-6 p-2.5 rounded-full bg-card border border-border hover:bg-hover transition-colors shadow-sm"
         title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
       >
-        {theme === 'light' ? <Moon size={18} className="text-secondary" /> : <Sun size={18} className="text-warning" />}
+        {theme === 'light' ? <Moon size={18} className="text-muted-foreground" /> : <Sun size={18} className="text-warning" />}
       </button>
 
       <div className="w-full max-w-[420px] mx-4">
@@ -45,7 +45,7 @@ export default function Login() {
               <span className="text-white font-bold text-xl">VT</span>
             </div>
             <h1 className="text-[22px] font-semibold text-primary">Welcome back</h1>
-            <p className="text-[13px] text-secondary mt-1">Sign in to Visa & Ticket System</p>
+            <p className="text-[13px] text-muted-foreground mt-1">Sign in to Mr. Ijaz Khan Ticket System</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,7 +99,7 @@ export default function Login() {
 
           <div className="mt-6 pt-5 border-t border-border text-center">
             <p className="text-[11px] text-tertiary">
-              Default credentials: <span className="font-medium text-secondary">admin / admin123</span>
+              Default credentials: <span className="font-medium text-muted-foreground">admin / admin123</span>
             </p>
           </div>
         </div>
@@ -107,3 +107,4 @@ export default function Login() {
     </div>
   );
 }
+

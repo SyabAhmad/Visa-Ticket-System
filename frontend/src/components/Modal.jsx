@@ -45,21 +45,24 @@ export default function Modal({ isOpen, onClose, title, children, wide }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-foreground/60 z-50 flex items-start justify-center pt-[8vh] p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div className="fixed inset-0 bg-foreground/60 z-50 flex items-start justify-center pt-[6vh] p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div className="absolute inset-0" onClick={onClose} />
       <div
         ref={modalRef}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        className={`relative bg-card border border-border rounded-xl shadow-xl ${wide ? 'w-full max-w-4xl' : 'w-full max-w-2xl'} max-h-[80vh] flex flex-col outline-none`}
+        className={`relative bg-card border border-border shadow-2xl outline-none flex flex-col max-h-[88vh] ${wide ? 'w-full max-w-5xl' : 'w-full max-w-2xl'} rounded-xl`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
-          <h2 id="modal-title" className="text-[16px] font-semibold text-primary">{title}</h2>
-          <button onClick={onClose} aria-label="Close modal" className="p-2 rounded-lg hover:bg-hover transition-colors">
-            <X size={18} className="text-secondary" />
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="w-1.5 h-5 rounded-full bg-primary" />
+            <h2 id="modal-title" className="text-[14px] font-semibold text-foreground">{title}</h2>
+          </div>
+          <button onClick={onClose} aria-label="Close modal" className="p-1.5 rounded-lg hover:bg-hover transition-colors">
+            <X size={16} className="text-muted-foreground" />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 p-6">
+        <div className="overflow-y-auto flex-1 px-5 py-4">
           {children}
         </div>
       </div>

@@ -48,7 +48,7 @@ function SectionHeader({ icon: Icon, title, variant = 'primary' }) {
       <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${variants[variant]}`}>
         <Icon size={14} />
       </div>
-      <h3 className="text-[12px] font-semibold text-secondary uppercase tracking-wider">
+      <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
         {title}
       </h3>
     </div>
@@ -183,7 +183,7 @@ export default function Expenses() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-[22px] font-normal text-foreground">Expenses</h1>
-          <p className="text-[13px] text-secondary mt-0.5">
+          <p className="text-[13px] text-muted-foreground mt-0.5">
             {summary.count} expense{summary.count !== 1 ? 's' : ''} — {formatCurrency(summary.total)} total
           </p>
         </div>
@@ -205,7 +205,7 @@ export default function Expenses() {
               <Receipt size={20} className="text-primary" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Total Expenses</p>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Total Expenses</p>
               <p className="text-[18px] font-semibold text-foreground mt-0.5">{formatCurrency(summary.total)}</p>
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function Expenses() {
               <Wallet size={20} className="text-warning" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Cash Payments</p>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Cash Payments</p>
               <p className="text-[18px] font-semibold text-warning mt-0.5">{formatCurrency(summary.cash_total)}</p>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function Expenses() {
               <Building2 size={20} className="text-info" />
             </div>
             <div>
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Bank Payments</p>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Bank Payments</p>
               <p className="text-[18px] font-semibold text-info mt-0.5">{formatCurrency(summary.bank_total)}</p>
             </div>
           </div>
@@ -238,17 +238,17 @@ export default function Expenses() {
       <div className="card mb-4 overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-4 py-2">
-            <Search size={18} className="text-secondary" />
+            <Search size={18} className="text-muted-foreground" />
             <input
               type="text"
               placeholder="Search expenses by title..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent outline-none text-[13px] text-foreground placeholder:text-secondary"
+              className="w-full bg-transparent outline-none text-[13px] text-foreground placeholder:text-muted-foreground"
             />
             {search && (
               <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-hover">
-                <X size={16} className="text-secondary" />
+                <X size={16} className="text-muted-foreground" />
               </button>
             )}
           </div>
@@ -256,7 +256,7 @@ export default function Expenses() {
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors ${
               showFilters || filterCategory || filterMethod
-                ? 'bg-active text-primary' : 'text-secondary hover:bg-hover'
+                ? 'bg-active text-primary' : 'text-muted-foreground hover:bg-hover'
             }`}
           >
             <Filter size={16} />
@@ -267,7 +267,7 @@ export default function Expenses() {
         {showFilters && (
           <div className="px-4 pb-3 flex flex-wrap items-center gap-3 border-t border-border pt-3">
             <div className="flex items-center gap-2">
-              <span className="text-[12px] text-secondary font-medium uppercase tracking-wider">Category</span>
+              <span className="text-[12px] text-muted-foreground font-medium uppercase tracking-wider">Category</span>
               <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="select px-3 py-1.5 text-[13px]">
                 <option value="">All Categories</option>
                 {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
@@ -275,7 +275,7 @@ export default function Expenses() {
             </div>
             <div className="h-5 w-px bg-border hidden sm:block" />
             <div className="flex items-center gap-2">
-              <span className="text-[12px] text-secondary font-medium uppercase tracking-wider">Payment</span>
+              <span className="text-[12px] text-muted-foreground font-medium uppercase tracking-wider">Payment</span>
               <div className="flex gap-1 bg-muted rounded-lg p-0.5">
                 {['all', 'cash', 'bank'].map(m => (
                   <button
@@ -283,7 +283,7 @@ export default function Expenses() {
                     onClick={() => setFilterMethod(m === 'all' ? '' : m)}
                     className={`px-3 py-1 rounded-md text-[12px] font-medium capitalize transition-colors ${
                       (m === 'all' && !filterMethod) || filterMethod === m
-                        ? 'bg-card text-primary shadow-sm' : 'text-secondary hover:text-primary'
+                        ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     {m}
@@ -322,7 +322,7 @@ export default function Expenses() {
               <thead>
                 <tr className="border-b border-border">
                   {['Date', 'Expense', 'Category', 'Amount', 'Method', 'Remarks', 'Actions'].map(h => (
-                    <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -335,7 +335,7 @@ export default function Expenses() {
                           <Receipt size={32} className="text-tertiary" />
                         </div>
                         <p className="text-[14px] font-medium text-foreground mb-1">No expenses found</p>
-                        <p className="text-[12px] text-secondary">
+                        <p className="text-[12px] text-muted-foreground">
                           {search || filterCategory || filterMethod
                             ? 'Try adjusting your search or filters'
                             : 'Record your first expense to get started'}
@@ -354,10 +354,10 @@ export default function Expenses() {
                     className="border-b border-border last:border-0 table-row cursor-pointer"
                     onClick={() => navigate(`/expenses/${e.id}`)}
                   >
-                    <td className="px-5 py-3 text-[13px] text-secondary whitespace-nowrap">{e.date || '—'}</td>
+                    <td className="px-5 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{e.date || '—'}</td>
                     <td className="px-5 py-3 text-[13px] font-medium text-foreground">{e.title}</td>
                     <td className="px-5 py-3">
-                      <span className="badge bg-muted text-secondary">{categoryLabel(e.category)}</span>
+                      <span className="badge bg-muted text-muted-foreground">{categoryLabel(e.category)}</span>
                     </td>
                     <td className="px-5 py-3 text-[13px] font-medium text-foreground whitespace-nowrap">{formatCurrency(e.amount)}</td>
                     <td className="px-5 py-3">
@@ -365,11 +365,11 @@ export default function Expenses() {
                         {e.payment_method === 'cash' ? 'Cash' : 'Bank'}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-[13px] text-secondary max-w-[200px] truncate">{e.payment_remarks || '—'}</td>
+                    <td className="px-5 py-3 text-[13px] text-muted-foreground max-w-[200px] truncate">{e.payment_remarks || '—'}</td>
                     <td className="px-5 py-3" onClick={(ev) => ev.stopPropagation()}>
                       <div className="flex gap-1">
                         <button onClick={() => openEdit(e)} className="p-1.5 rounded-full hover:bg-hover transition-colors" title="Edit">
-                          <Edit2 size={16} className="text-secondary" />
+                          <Edit2 size={16} className="text-muted-foreground" />
                         </button>
                         <button onClick={() => setDeleteConfirm(e.id)} className="p-1.5 rounded-full hover:bg-danger-light transition-colors" title="Delete">
                           <Trash2 size={16} className="text-danger" />
@@ -416,7 +416,7 @@ export default function Expenses() {
                 >
                   {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none" />
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               </div>
             </div>
             <div>
@@ -457,7 +457,7 @@ export default function Expenses() {
                   <option value="cash">Cash</option>
                   <option value="bank">Bank Transfer</option>
                 </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none" />
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               </div>
             </div>
             <div className="sm:col-span-1">
@@ -508,7 +508,7 @@ export default function Expenses() {
             <AlertTriangle size={28} className="text-danger" />
           </div>
           <p className="text-[14px] text-foreground mb-1">Are you sure you want to delete this expense?</p>
-          <p className="text-[12px] text-secondary">This action cannot be undone.</p>
+          <p className="text-[12px] text-muted-foreground">This action cannot be undone.</p>
         </div>
         <div className="flex justify-center gap-3 mt-6">
           <button onClick={() => setDeleteConfirm(null)} className="btn btn-secondary">Cancel</button>
@@ -518,3 +518,4 @@ export default function Expenses() {
     </div>
   );
 }
+

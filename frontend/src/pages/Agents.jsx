@@ -107,7 +107,7 @@ export default function Agents() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-[22px] font-semibold text-primary">Agents</h1>
-          <p className="text-[13px] text-secondary mt-0.5">{agents.length} agent{agents.length !== 1 ? 's' : ''}</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">{agents.length} agent{agents.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={exportCSV} className="btn btn-secondary">
@@ -123,11 +123,11 @@ export default function Agents() {
       <div className="card mb-4 overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-4 py-2">
-            <Search size={18} className="text-secondary" />
+            <Search size={18} className="text-muted-foreground" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search agents..." className="w-full bg-transparent outline-none text-[13px] text-primary placeholder:text-tertiary" />
             {search && <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-hover"><X size={16} className="text-tertiary" /></button>}
           </div>
-          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors relative ${showFilters ? 'bg-hover text-primary' : 'text-secondary hover:bg-muted'}`}>
+          <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors relative ${showFilters ? 'bg-hover text-primary' : 'text-muted-foreground hover:bg-muted'}`}>
             <Filter size={16} /><span>Filter</span>
             {activeFilters > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white rounded-full text-[10px] flex items-center justify-center">{activeFilters}</span>}
           </button>
@@ -167,7 +167,7 @@ export default function Agents() {
         ) : filteredAgents.length === 0 ? (
           <div className="col-span-full card px-5 py-16 text-center">
             <Users size={48} className="mx-auto text-tertiary mb-3" />
-            <p className="text-[14px] text-secondary">No agents found</p>
+            <p className="text-[14px] text-muted-foreground">No agents found</p>
             <p className="text-[12px] text-tertiary mt-1">Try a different search or add your first agent</p>
           </div>
         ) : filteredAgents.map((a) => (
@@ -190,13 +190,13 @@ export default function Agents() {
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-hover"><Edit2 size={16} className="text-secondary" /></button>
+                  <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-hover"><Edit2 size={16} className="text-muted-foreground" /></button>
                   <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-danger-light"><Trash2 size={16} className="text-danger" /></button>
                 </div>
               </div>
               <div className="space-y-2 text-[13px]">
-                {a.phone && <p className="text-secondary">{a.phone}</p>}
-                {a.email && <p className="text-secondary">{a.email}</p>}
+                {a.phone && <p className="text-muted-foreground">{a.phone}</p>}
+                {a.email && <p className="text-muted-foreground">{a.email}</p>}
                 <p className="text-primary font-medium">Commission: {a.commission_rate}%</p>
               </div>
             </div>
@@ -240,3 +240,4 @@ export default function Agents() {
     </div>
   );
 }
+

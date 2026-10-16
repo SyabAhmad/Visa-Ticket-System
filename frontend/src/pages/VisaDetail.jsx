@@ -39,7 +39,7 @@ export default function VisaDetail() {
     <div className="flex items-center justify-center h-64">
       <div className="flex flex-col items-center gap-3">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-sm text-secondary">Loading visa...</p>
+        <p className="text-sm text-muted-foreground">Loading visa...</p>
       </div>
     </div>
   );
@@ -48,10 +48,10 @@ export default function VisaDetail() {
   const InfoRow = ({ icon: Icon, label, value }) => (
     <div className="flex items-start gap-3 py-3">
       <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon size={16} className="text-secondary" />
+        <Icon size={16} className="text-muted-foreground" />
       </div>
       <div>
-        <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">{label}</p>
+        <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{label}</p>
         <p className="text-[13px] text-primary mt-0.5">{value || '—'}</p>
       </div>
     </div>
@@ -69,11 +69,11 @@ export default function VisaDetail() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button onClick={() => navigate('/visas')} className="p-2 rounded-lg hover:bg-hover transition-colors">
-          <ArrowLeft size={20} className="text-secondary" />
+          <ArrowLeft size={20} className="text-muted-foreground" />
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="text-[22px] font-semibold text-primary">Visa Details</h1>
-          <p className="text-[13px] text-secondary mt-0.5">{visa.visa_type} — {visa.passenger_name}</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">{visa.visa_type} — {visa.passenger_name}</p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button onClick={() => setPrintOpen(true)} className="btn btn-secondary">
@@ -96,7 +96,7 @@ export default function VisaDetail() {
             <status.icon size={28} className={status.text} />
             <div>
               <p className={`text-[16px] font-medium ${status.text}`}>{status.label}</p>
-              <p className="text-[13px] text-secondary">Visa status</p>
+              <p className="text-[13px] text-muted-foreground">Visa status</p>
             </div>
           </div>
 
@@ -140,19 +140,19 @@ export default function VisaDetail() {
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Visa Process</span>
+                <span className="text-[13px] text-muted-foreground">Visa Process</span>
                 <span className="text-[14px] text-primary font-semibold">PKR {(visa.visa_process_charges || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Medical Token</span>
+                <span className="text-[13px] text-muted-foreground">Medical Token</span>
                 <span className="text-[14px] text-primary font-semibold">PKR {(visa.medical_token_charges || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Agreement Paper</span>
+                <span className="text-[13px] text-muted-foreground">Agreement Paper</span>
                 <span className="text-[14px] text-primary font-semibold">PKR {(visa.agreement_paper_charges || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Extra Charges</span>
+                <span className="text-[13px] text-muted-foreground">Extra Charges</span>
                 <span className="text-[14px] text-primary font-semibold">PKR {(visa.extra_charges || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 pt-1">
@@ -170,17 +170,17 @@ export default function VisaDetail() {
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Received</span>
+                <span className="text-[13px] text-muted-foreground">Received</span>
                 <span className="text-[14px] text-success font-semibold">PKR {(visa.received || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Dues</span>
+                <span className="text-[13px] text-muted-foreground">Dues</span>
                 <span className={`text-[14px] font-semibold ${(visa.dues || 0) > 0 ? 'text-danger' : 'text-success'}`}>
                   PKR {(visa.dues || 0).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Purchase Rate</span>
+                <span className="text-[13px] text-muted-foreground">Purchase Rate</span>
                 <span className="text-[14px] text-primary font-semibold">PKR {(visa.purchase_rate || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 pt-1">
@@ -204,7 +204,7 @@ export default function VisaDetail() {
               </div>
               <div>
                 <p className="text-[14px] font-medium text-primary">{visa.agent_name}</p>
-                <p className="text-[12px] text-secondary">Agent</p>
+                <p className="text-[12px] text-muted-foreground">Agent</p>
               </div>
             </div>
           </div>
@@ -249,3 +249,4 @@ function Banknote(props) {
     </svg>
   );
 }
+

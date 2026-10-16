@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.visaticket.system",
-    "productName": "Visa Ticket System",
+    "productName": "Mr. Ijaz Khan",
     "directories": {
       "output": "release"
     },
@@ -42,7 +42,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Visa Ticket System"
+      "shortcutName": "Mr. Ijaz Khan"
     }
   }
 }

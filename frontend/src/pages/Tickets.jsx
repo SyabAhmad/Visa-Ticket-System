@@ -53,7 +53,7 @@ function SectionHeader({ icon: Icon, title, variant = 'primary' }) {
       <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${variants[variant]}`}>
         <Icon size={14} />
       </div>
-      <h3 className="text-[12px] font-semibold text-secondary uppercase tracking-wider">
+      <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
         {title}
       </h3>
     </div>
@@ -285,14 +285,14 @@ export default function Tickets() {
           <h1 className="text-[22px] font-normal text-primary">
             Ticket Bookings
           </h1>
-          <p className="text-[13px] text-secondary mt-0.5">
+          <p className="text-[13px] text-muted-foreground mt-0.5">
             {tickets.length} booking{tickets.length !== 1 ? 's' : ''} total
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2 border border-border text-secondary px-4 py-2.5 rounded-full text-[13px] font-medium bg-card hover:bg-hover transition-all"
+            className="flex items-center gap-2 border border-border text-muted-foreground px-4 py-2.5 rounded-full text-[13px] font-medium bg-card hover:bg-hover transition-all"
           >
             <Download size={16} /> Export CSV
           </button>
@@ -309,20 +309,20 @@ export default function Tickets() {
       <div className="bg-card rounded-xl border border-border mb-4 overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-4 py-2">
-            <Search size={18} className="text-secondary" />
+            <Search size={18} className="text-muted-foreground" />
             <input
               type="text"
               placeholder="Search by passenger, PNR, agent, sector..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent outline-none text-[13px] text-primary placeholder:text-secondary"
+              className="w-full bg-transparent outline-none text-[13px] text-primary placeholder:text-muted-foreground"
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
                 className="p-0.5 rounded-full hover:bg-hover"
               >
-                <X size={16} className="text-secondary" />
+                <X size={16} className="text-muted-foreground" />
               </button>
             )}
           </div>
@@ -331,7 +331,7 @@ export default function Tickets() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] transition-colors ${
               showFilters
                 ? 'bg-active text-primary'
-                : 'text-secondary hover:bg-hover'
+                : 'text-muted-foreground hover:bg-hover'
             }`}
           >
             <Filter size={16} />
@@ -344,7 +344,7 @@ export default function Tickets() {
         {showFilters && (
           <div className="px-4 pb-3 flex flex-wrap items-center gap-3 border-t border-border pt-3">
             <div className="flex items-center gap-2">
-              <span className="text-[12px] text-secondary font-medium uppercase tracking-wider">
+              <span className="text-[12px] text-muted-foreground font-medium uppercase tracking-wider">
                 Status
               </span>
               <div className="flex gap-1 bg-muted rounded-lg p-0.5">
@@ -355,7 +355,7 @@ export default function Tickets() {
                     className={`px-3 py-1.5 rounded-md text-[12px] font-medium capitalize transition-colors ${
                       filterStatus === s
                         ? 'bg-card text-primary shadow-sm'
-                        : 'text-secondary hover:text-primary'
+                        : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
                     {s}
@@ -365,7 +365,7 @@ export default function Tickets() {
             </div>
             <div className="h-5 w-px bg-border hidden sm:block" />
             <div className="flex items-center gap-2">
-              <span className="text-[12px] text-secondary font-medium uppercase tracking-wider">
+              <span className="text-[12px] text-muted-foreground font-medium uppercase tracking-wider">
                 Agent
               </span>
               <select
@@ -444,7 +444,7 @@ export default function Tickets() {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="text-left px-4 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider whitespace-nowrap"
+                      className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -468,7 +468,7 @@ export default function Tickets() {
                         <p className="text-[14px] font-medium text-primary mb-1">
                           No bookings found
                         </p>
-                        <p className="text-[12px] text-secondary">
+                        <p className="text-[12px] text-muted-foreground">
                           {search || filterStatus !== 'all' || filterAgent
                             ? 'Try adjusting your search or filters'
                             : 'Create your first booking to get started'}
@@ -496,28 +496,28 @@ export default function Tickets() {
                       <td className="px-4 py-3 text-[13px] font-medium text-primary">
                         {t.passenger_name}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">
                         {t.agent_name || '—'}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary font-mono">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground font-mono">
                         {t.pnr_number || '—'}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">
                         {t.sector || '—'}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">
                         {t.airline || '—'}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary capitalize">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground capitalize">
                         {t.trip_type === 'return' ? 'Return' : 'One Way'}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary whitespace-nowrap">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">
                         {formatDate(t.departure_date)}
                       </td>
                       <td className="px-4 py-3 text-[13px] text-primary font-medium whitespace-nowrap">
                         {formatCurrency(t.total_payment)}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary whitespace-nowrap">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">
                         {formatCurrency(t.received_payment)}
                       </td>
                       <td className="px-4 py-3 text-[13px] whitespace-nowrap">
@@ -525,13 +525,13 @@ export default function Tickets() {
                           className={
                             t.dues > 0
                               ? 'text-danger font-medium'
-                              : 'text-secondary'
+                              : 'text-muted-foreground'
                           }
                         >
                           {t.dues > 0 ? formatCurrency(t.dues) : '—'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary whitespace-nowrap">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">
                         {formatCurrency(t.purchase_rate)}
                       </td>
                       <td className="px-4 py-3 text-[13px] whitespace-nowrap">
@@ -539,13 +539,13 @@ export default function Tickets() {
                           className={
                             t.ticket_profit > 0
                               ? 'text-success font-medium'
-                              : 'text-secondary'
+                              : 'text-muted-foreground'
                           }
                         >
                           {formatCurrency(t.ticket_profit)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-secondary whitespace-nowrap">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">
                         {formatCurrency(t.agent_commission)}
                       </td>
                       <td className="px-4 py-3">
@@ -563,7 +563,7 @@ export default function Tickets() {
                           >
                             <Edit2
                               size={16}
-                              className="text-secondary"
+                              className="text-muted-foreground"
                             />
                           </button>
                           <button
@@ -709,7 +709,7 @@ export default function Tickets() {
                 </select>
                 <ChevronDown
                   size={16}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
                 />
               </div>
             </div>
@@ -832,7 +832,7 @@ export default function Tickets() {
                 </select>
                 <ChevronDown
                   size={16}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
                 />
               </div>
             </div>
@@ -871,7 +871,7 @@ export default function Tickets() {
                 </select>
                 <ChevronDown
                   size={16}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
                 />
               </div>
             </div>
@@ -1000,7 +1000,7 @@ export default function Tickets() {
           {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
             <div className="bg-success-light rounded-lg p-3 border border-success-border">
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">
                 Ticket Profit
               </p>
               <p className="text-[16px] font-semibold text-success mt-0.5">
@@ -1008,7 +1008,7 @@ export default function Tickets() {
               </p>
             </div>
             <div className="bg-info-light rounded-lg p-3 border border-info-border">
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">
                 Agent Commission ({preview.pct}%)
               </p>
               <p className="text-[16px] font-semibold text-info mt-0.5">
@@ -1022,7 +1022,7 @@ export default function Tickets() {
                   : 'bg-success-light border-success-border'
               }`}
             >
-              <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">
                 Dues
               </p>
               <p
@@ -1040,7 +1040,7 @@ export default function Tickets() {
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="px-5 py-2.5 rounded-full text-[13px] font-medium text-secondary hover:bg-hover transition-colors"
+              className="px-5 py-2.5 rounded-full text-[13px] font-medium text-muted-foreground hover:bg-hover transition-colors"
             >
               Cancel
             </button>
@@ -1067,20 +1067,20 @@ export default function Tickets() {
           <p className="text-[14px] text-primary mb-1">
             Are you sure you want to delete this booking?
           </p>
-          <p className="text-[12px] text-secondary">
+          <p className="text-[12px] text-muted-foreground">
             This action cannot be undone.
           </p>
         </div>
         <div className="flex justify-center gap-3 mt-6">
           <button
             onClick={() => setDeleteConfirm(null)}
-            className="px-5 py-2.5 rounded-full text-[13px] font-medium text-secondary hover:bg-hover border border-border transition-colors"
+            className="px-5 py-2.5 rounded-full text-[13px] font-medium text-muted-foreground hover:bg-hover border border-border transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={() => handleDelete(deleteConfirm)}
-            className="px-5 py-2.5 bg-danger text-white rounded-full text-[13px] font-medium hover:opacity-90 transition-all"
+            className="px-5 py-2.5 bg-danger text-white rounded-md text-[13px] font-medium hover:opacity-90 transition-all"
           >
             Delete
           </button>
@@ -1089,3 +1089,4 @@ export default function Tickets() {
     </div>
   );
 }
+

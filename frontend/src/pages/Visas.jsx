@@ -251,7 +251,7 @@ export default function Visas() {
             <Stamp size={24} className="text-primary" />
             Visa Processing
           </h1>
-          <p className="text-[13px] text-secondary mt-1">
+          <p className="text-[13px] text-muted-foreground mt-1">
             {filteredVisas.length} record{filteredVisas.length !== 1 ? 's' : ''} total
           </p>
         </div>
@@ -269,7 +269,7 @@ export default function Visas() {
       <div className="card mb-4">
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex-1 flex items-center gap-2 bg-muted rounded-full px-4 py-2">
-            <Search size={18} className="text-secondary" />
+            <Search size={18} className="text-muted-foreground" />
             <input
               type="text"
               placeholder="Search by name, passport, visa number..."
@@ -279,7 +279,7 @@ export default function Visas() {
             />
             {search && (
               <button onClick={() => setSearch('')} className="p-0.5 rounded-full hover:bg-hover">
-                <X size={16} className="text-secondary" />
+                <X size={16} className="text-muted-foreground" />
               </button>
             )}
           </div>
@@ -288,7 +288,7 @@ export default function Visas() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-medium transition-colors ${
               showFilters || filterAgent || filterStatus || filterPayment
                 ? 'bg-danger-light text-primary'
-                : 'text-secondary hover:bg-muted'
+                : 'text-muted-foreground hover:bg-muted'
             }`}
           >
             <Filter size={16} />
@@ -305,7 +305,7 @@ export default function Visas() {
           <div className="px-4 pb-4 border-t border-border pt-3">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Agent</span>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Agent</span>
                 <select
                   value={filterAgent}
                   onChange={e => setFilterAgent(e.target.value)}
@@ -317,7 +317,7 @@ export default function Visas() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Visa Status</span>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Visa Status</span>
                 <select
                   value={filterStatus}
                   onChange={e => setFilterStatus(e.target.value)}
@@ -329,7 +329,7 @@ export default function Visas() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">Payment</span>
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Payment</span>
                 <select
                   value={filterPayment}
                   onChange={e => setFilterPayment(e.target.value)}
@@ -363,7 +363,7 @@ export default function Visas() {
               <thead>
                 <tr className="border-b border-border bg-muted">
                   {['Passenger', 'Agent', 'Visa Type', 'Visa No', 'Total Charges', 'Received', 'Purchase Rate', 'Commission', 'Payment Status', 'Visa Status', ''].map(h => (
-                    <th key={h || 'act'} className="text-left px-4 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider whitespace-nowrap">{h}</th>
+                    <th key={h || 'act'} className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -376,7 +376,7 @@ export default function Visas() {
               <thead>
                 <tr className="border-b border-border bg-muted">
                   {['Passenger', 'Agent', 'Visa Type', 'Visa No', 'Total Charges', 'Received', 'Purchase Rate', 'Commission', 'Payment Status', 'Visa Status', ''].map(h => (
-                    <th key={h || 'act'} className="text-left px-4 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider whitespace-nowrap">{h}</th>
+                    <th key={h || 'act'} className="text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -389,7 +389,7 @@ export default function Visas() {
                           <Stamp size={28} className="text-tertiary" />
                         </div>
                         <p className="text-[14px] font-medium text-primary mb-1">No visa records found</p>
-                        <p className="text-[13px] text-secondary mb-4">
+                        <p className="text-[13px] text-muted-foreground mb-4">
                           {search || filterAgent || filterStatus || filterPayment
                             ? 'Try adjusting your search or filters'
                             : 'Create your first visa record to get started'}
@@ -415,13 +415,13 @@ export default function Visas() {
                           <span className="text-[13px] font-medium text-primary">{v.passenger_name}</span>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className="text-[13px] text-secondary">{v.agent_name || '—'}</span>
+                          <span className="text-[13px] text-muted-foreground">{v.agent_name || '—'}</span>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className="text-[13px] text-secondary capitalize">{v.visa_type}</span>
+                          <span className="text-[13px] text-muted-foreground capitalize">{v.visa_type}</span>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className="text-[13px] text-secondary font-mono">{v.visa_number || '—'}</span>
+                          <span className="text-[13px] text-muted-foreground font-mono">{v.visa_number || '—'}</span>
                         </td>
                         <td className="px-4 py-3.5">
                           <span className="text-[13px] font-semibold text-primary">{formatCurrency(v.total_charges)}</span>
@@ -430,10 +430,10 @@ export default function Visas() {
                           <span className="text-[13px] text-success font-medium">{formatCurrency(v.received)}</span>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className="text-[13px] text-secondary">{formatCurrency(v.purchase_rate)}</span>
+                          <span className="text-[13px] text-muted-foreground">{formatCurrency(v.purchase_rate)}</span>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={`text-[13px] font-medium ${(v.commission || 0) > 0 ? 'text-success' : 'text-secondary'}`}>
+                          <span className={`text-[13px] font-medium ${(v.commission || 0) > 0 ? 'text-success' : 'text-muted-foreground'}`}>
                             {formatCurrency(v.commission)}
                           </span>
                         </td>
@@ -453,7 +453,7 @@ export default function Visas() {
                               className="p-1.5 rounded-lg hover:bg-hover transition-colors"
                               title="Edit"
                             >
-                              <Edit2 size={15} className="text-secondary" />
+                              <Edit2 size={15} className="text-muted-foreground" />
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(v.id)}
@@ -661,7 +661,7 @@ export default function Visas() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div className={`rounded-lg p-4 ${preview.total - (Number(form.received) || 0) > 0 ? 'bg-warning-light' : 'bg-success-light'}`}>
                 <div className="flex justify-between items-center">
-                  <span className="text-[12px] font-medium text-secondary uppercase tracking-wider">Dues</span>
+                  <span className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">Dues</span>
                   <span className={`text-[16px] font-semibold ${preview.total - (Number(form.received) || 0) > 0 ? 'text-danger' : 'text-success'}`}>
                     {formatCurrency(preview.total - (Number(form.received) || 0))}
                   </span>
@@ -669,7 +669,7 @@ export default function Visas() {
               </div>
               <div className="rounded-lg p-4 bg-success-light">
                 <div className="flex justify-between items-center">
-                  <span className="text-[12px] font-medium text-secondary uppercase tracking-wider">Commission</span>
+                  <span className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">Commission</span>
                   <span className="text-[16px] font-semibold text-success">
                     {formatCurrency(preview.commission)}
                     {preview.total > 0 && (
@@ -709,7 +709,7 @@ export default function Visas() {
             </div>
             <div>
               <p className="text-[14px] font-medium text-primary">Are you sure?</p>
-              <p className="text-[13px] text-secondary mt-0.5">
+              <p className="text-[13px] text-muted-foreground mt-0.5">
                 This visa record will be permanently deleted. This action cannot be undone.
               </p>
             </div>
@@ -727,3 +727,4 @@ export default function Visas() {
     </div>
   );
 }
+

@@ -11,12 +11,13 @@ import {
   Settings,
   LogOut,
   Menu,
-  Search,
+  ChevronLeft,
+  ChevronRight,
   Plus,
   Clock,
   Sun,
   Moon,
-  ChevronLeft,
+  Search,
   Receipt,
 } from 'lucide-react';
 
@@ -44,6 +45,7 @@ export default function Layout() {
   const [headerAction, setHeaderAction] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const profileRef = useRef(null);
 
   useEffect(() => {
@@ -61,79 +63,83 @@ export default function Layout() {
     logout();
     navigate('/login');
   };
-
-  const quickAddItems = [
-    { label: 'Add Ticket', icon: Ticket, action: () => navigate('/tickets') },
-    { label: 'Add Visa', icon: Stamp, action: () => navigate('/visas') },
-    { label: 'Add Agent', icon: Users, action: () => navigate('/agents') },
-  ];
+  const requestLogout = () => {
+    setProfileOpen(false);
+    setSignOutOpen(true);
+  };
+  const confirmLogout = () => {
+    setSignOutOpen(false);
+    handleLogout();
+  };
 
   const SidebarContent = ({ collapsed }) => (
     <>
-      <div className={`flex items-center ${collapsed ? 'justify-center px-2' : 'px-5'} h-[64px] flex-shrink-0`}>
+      {/* Edge collapse toggle (desktop, middle of sidebar) */}
+      <button
+        type="button"
+        onClick={() => setSidebarCollapsed((p) => !p)}
+        className="hidden lg:flex absolute left-full top-1/2 z-20 h-6 w-6 -translate-y-1/2 -translate-x-1/2 items-center justify-center rounded-full border border-sidebar-border bg-card text-foreground shadow-sm hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+      </button>
+
+      {/* Brand */}
+      <div className={`flex items-center ${collapsed ? 'justify-center px-2 py-2' : 'px-3 py-3'} flex-shrink-0`}>
         {!collapsed ? (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">VT</span>
-            </div>
-            <div>
-              <span className="font-semibold text-[15px] text-white">Visa & Ticket</span>
-              <p className="text-[10px] text-sidebar-foreground -mt-0.5">Management System</p>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt="Mr. Ijaz Khan"
+              className="w-9 h-9 rounded-lg object-cover"
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+            />
+            <div className="min-w-0">
+              <div className="text-[13px] font-bold text-foreground leading-tight truncate">Mr. Ijaz Khan</div>
+              <div className="text-[10px] text-muted-foreground truncate">Ticket &amp; Visa System</div>
             </div>
           </div>
         ) : (
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-sm">VT</span>
-          </div>
+          <img src="/logo.png" alt="Mr. Ijaz Khan" className="w-9 h-9 rounded-lg object-cover" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }} />
         )}
       </div>
 
-      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+      {/* Navigation */}
+      <nav className="flex-1 py-1 px-1 space-y-0 overflow-y-auto">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `nav-item ${collapsed ? 'justify-center px-0 mx-1' : ''} ${isActive ? 'active' : ''}`
+              `nav-item ${collapsed ? 'justify-center mx-1 px-0' : ''} ${isActive ? 'active' : ''}`
             }
             title={collapsed ? label : undefined}
             onClick={() => setMobileSidebarOpen(false)}
           >
-            <Icon size={20} className="flex-shrink-0" />
+            <span className="icon-wrap">
+              <Icon size={14} className="flex-shrink-0" />
+            </span>
             {!collapsed && <span>{label}</span>}
           </NavLink>
         ))}
       </nav>
 
-      <div className="px-3 pb-2 flex-shrink-0">
-        <button
-          onClick={() => setSidebarCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm transition-colors"
-        >
-          <ChevronLeft size={18} className={`transition-transform ${collapsed ? 'rotate-180' : ''}`} />
-          {!collapsed && <span>Collapse</span>}
-        </button>
-      </div>
-
-      <div className={`border-t border-sidebar-border ${collapsed ? 'px-2 py-3' : 'px-4 py-4'} flex-shrink-0`}>
+      {/* Profile footer */}
+      <div className={`border-t border-sidebar-border ${collapsed ? 'px-1 py-2' : 'px-2 py-2.5'} flex-shrink-0`}>
         {collapsed ? (
-          <button onClick={handleLogout} className="w-full flex justify-center p-2 rounded-lg hover:bg-sidebar-accent text-sidebar-foreground hover:text-danger transition-colors">
-            <LogOut size={20} />
+          <button onClick={requestLogout} className="w-full flex justify-center p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-danger transition-colors" title="Logout">
+            <LogOut size={14} />
           </button>
         ) : (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
-              {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'A'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user?.full_name || user?.username}</p>
-              <p className="text-xs text-sidebar-foreground truncate capitalize">{user?.role}</p>
-            </div>
-            <button onClick={handleLogout} className="p-1.5 rounded-lg hover:bg-sidebar-accent text-sidebar-foreground hover:text-danger flex-shrink-0 transition-colors" title="Logout">
-              <LogOut size={18} />
-            </button>
-          </div>
+          <button
+            onClick={requestLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11.5px] font-medium text-white transition-all"
+            style={{ background: 'linear-gradient(180deg, #d93025, #b8261c)', boxShadow: '0 2px 6px rgba(217, 48, 37, 0.3)' }}
+          >
+            <LogOut size={13} />
+            <span>Sign out</span>
+          </button>
         )}
       </div>
     </>
@@ -143,7 +149,7 @@ export default function Layout() {
     <HeaderActionsContext.Provider value={{ triggerAdd: setHeaderAction }}>
       <div className="flex h-screen overflow-hidden bg-page">
         {/* Desktop Sidebar */}
-        <aside className={`${sidebarCollapsed ? 'w-[72px]' : 'w-[260px]'} hidden lg:flex flex-shrink-0 flex-col bg-sidebar transition-all duration-200`}>
+        <aside className={`relative ${sidebarCollapsed ? 'w-[68px]' : 'w-[220px]'} hidden lg:flex flex-shrink-0 flex-col bg-sidebar border-r border-sidebar-border transition-all duration-200`}>
           <SidebarContent collapsed={sidebarCollapsed} />
         </aside>
 
@@ -151,7 +157,7 @@ export default function Layout() {
         {mobileSidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <div className="absolute inset-0 bg-foreground/50" onClick={() => setMobileSidebarOpen(false)} />
-            <aside className="absolute left-0 top-0 bottom-0 w-[260px] bg-sidebar flex flex-col">
+            <aside className="absolute left-0 top-0 bottom-0 w-[220px] bg-sidebar flex flex-col">
               <SidebarContent collapsed={false} />
             </aside>
           </div>
@@ -160,81 +166,70 @@ export default function Layout() {
         {/* Main content */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Top bar */}
-          <header className="h-[64px] bg-card border-b border-border flex items-center px-4 md:px-6 gap-3 flex-shrink-0">
+          <header className="h-[44px] bg-card border-b border-border flex items-center px-3 md:px-4 gap-2 flex-shrink-0">
             <button
-              onClick={() => setMobileSidebarOpen(true)}
-              className="p-2 rounded-lg hover:bg-hover transition-colors lg:hidden flex-shrink-0"
+              onClick={() => setMobileSidebarOpen((p) => !p)}
+              className="p-2 rounded-md hover:bg-hover transition-colors flex-shrink-0 lg:hidden"
+              aria-label="Open sidebar"
             >
-              <Menu size={22} className="text-secondary" />
+              <Menu size={18} className="text-foreground" />
             </button>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center bg-muted rounded-full px-4 py-2.5 hover:shadow-sm transition-all focus-within:bg-card focus-within:shadow-md">
-                <Search size={18} className="text-tertiary mr-3 flex-shrink-0" />
+              <div className="flex items-center bg-muted rounded-md px-3 py-1.5 hover:shadow-sm transition-all focus-within:bg-card focus-within:shadow-md">
+                <Search size={16} className="text-tertiary mr-2 flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search tickets, visas, agents..."
-                  className="w-full bg-transparent outline-none text-[13px] text-primary placeholder:text-tertiary"
+                  className="w-full bg-transparent outline-none text-[12px] text-primary placeholder:text-tertiary"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              {quickAddItems.map(({ label, icon: Icon, action }) => (
-                <button
-                  key={label}
-                  onClick={action}
-                  className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full text-[12px] font-medium text-secondary bg-muted hover:bg-hover transition-colors border border-border"
-                  title={label}
-                >
-                  <Plus size={14} className="text-primary" />
-                  <span>{label}</span>
-                </button>
-              ))}
-
               <button
                 onClick={toggleTheme}
-                className="p-2.5 rounded-full hover:bg-hover transition-colors"
+                className="p-2 rounded-md hover:bg-hover transition-colors"
                 title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
               >
-                {theme === 'light' ? <Moon size={18} className="text-secondary" /> : <Sun size={18} className="text-warning" />}
+                {theme === 'light' ? <Moon size={16} className="text-foreground" /> : <Sun size={16} className="text-warning" />}
               </button>
 
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm cursor-pointer hover:shadow-md transition-shadow"
+                  className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-white font-medium text-xs cursor-pointer hover:shadow-md transition-shadow"
                 >
                   {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'A'}
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-60 bg-card rounded-xl shadow-xl border border-border z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-border">
-                      <p className="text-[13px] font-medium text-primary">{user?.full_name || user?.username}</p>
-                      <p className="text-[11px] text-tertiary capitalize">{user?.role}</p>
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-card rounded-md shadow-xl border border-border z-50 overflow-hidden">
+                    <div className="px-3 py-2 border-b border-border">
+                      <p className="text-[12px] font-medium text-primary">{user?.full_name || user?.username}</p>
+                      <p className="text-[10px] text-tertiary capitalize">{user?.role}</p>
                     </div>
                     <div className="py-1">
                       <button
                         onClick={() => { setProfileOpen(false); navigate('/settings'); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-secondary hover:bg-hover transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-hover transition-colors"
                       >
-                        <Settings size={16} />
-                        Settings
+                        <Settings size={14} className="text-foreground" />
+                        <span className="text-foreground">Settings</span>
                       </button>
                       <button
                         onClick={() => { setProfileOpen(false); navigate('/activity'); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-secondary hover:bg-hover transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-hover transition-colors"
                       >
-                        <Clock size={16} />
-                        Activity Log
+                        <Clock size={14} className="text-foreground" />
+                        <span className="text-foreground">Activity Log</span>
                       </button>
                       <div className="border-t border-border my-1" />
                       <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-danger hover:bg-danger-light transition-colors"
+                        onClick={requestLogout}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-danger hover:bg-danger-light transition-colors"
                       >
-                        <LogOut size={16} />
+                        <LogOut size={14} />
                         Sign out
                       </button>
                     </div>
@@ -245,11 +240,35 @@ export default function Layout() {
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-auto p-4 md:p-6">
+          <main className="flex-1 overflow-auto p-3 md:p-4">
             <Outlet />
           </main>
         </div>
       </div>
+      {signOutOpen && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center">
+          <div className="absolute inset-0 bg-foreground/60" onClick={() => setSignOutOpen(false)} />
+          <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-sm p-5">
+            <h3 className="text-[14px] font-semibold text-foreground mb-1 text-center">Sign out</h3>
+            <p className="text-[13px] text-muted-foreground mb-2 text-center">Are you sure you want to sign out?</p>
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setSignOutOpen(false)}
+                className="px-4 py-2 rounded-md text-[12px] font-medium bg-secondary text-secondary-foreground border border-border hover:bg-hover transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2 rounded-md text-[12px] font-medium text-white transition-colors"
+                style={{ background: 'linear-gradient(180deg, #d93025, #b8261c)' }}
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </HeaderActionsContext.Provider>
   );
 }

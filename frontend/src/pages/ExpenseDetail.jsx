@@ -66,11 +66,11 @@ export default function ExpenseDetail() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button onClick={() => navigate('/expenses')} className="p-2 rounded-lg hover:bg-hover transition-colors">
-          <ArrowLeft size={20} className="text-secondary" />
+          <ArrowLeft size={20} className="text-muted-foreground" />
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="text-[22px] font-semibold text-foreground">Expense Details</h1>
-          <p className="text-[13px] text-secondary mt-0.5">{expense.title}</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">{expense.title}</p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button onClick={() => navigate('/expenses', { state: { editId: expense.id } })} className="btn btn-secondary">
@@ -96,58 +96,58 @@ export default function ExpenseDetail() {
             }
           </div>
           <div>
-            <p className="text-[12px] text-secondary uppercase tracking-wider">Amount</p>
+            <p className="text-[12px] text-muted-foreground uppercase tracking-wider">Amount</p>
             <p className="text-[32px] font-normal text-foreground">{formatCurrency(expense.amount)}</p>
           </div>
         </div>
 
         {/* Details Card */}
         <div className="card p-6">
-          <h3 className="text-[13px] font-medium text-secondary uppercase tracking-wider mb-4">Details</h3>
+          <h3 className="text-[13px] font-medium text-muted-foreground uppercase tracking-wider mb-4">Details</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <Receipt size={18} className="text-secondary" />
+                <Receipt size={18} className="text-muted-foreground" />
               </div>
               <div>
-                <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Title</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Title</p>
                 <p className="text-[14px] text-foreground mt-0.5">{expense.title}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <FileText size={18} className="text-secondary" />
+                <FileText size={18} className="text-muted-foreground" />
               </div>
               <div>
-                <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Category</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Category</p>
                 <p className="text-[14px] text-foreground mt-0.5">{categoryLabel(expense.category)}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <Calendar size={18} className="text-secondary" />
+                <Calendar size={18} className="text-muted-foreground" />
               </div>
               <div>
-                <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Date</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Date</p>
                 <p className="text-[14px] text-foreground mt-0.5">{expense.date || '—'}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <Wallet size={18} className="text-secondary" />
+                <Wallet size={18} className="text-muted-foreground" />
               </div>
               <div>
-                <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Payment Method</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Payment Method</p>
                 <p className="text-[14px] text-foreground mt-0.5 capitalize">{expense.payment_method === 'bank' ? 'Bank Transfer' : 'Cash'}</p>
               </div>
             </div>
             {expense.payment_remarks && (
               <div className="flex items-start gap-3 sm:col-span-2">
                 <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <MessageSquare size={18} className="text-secondary" />
+                  <MessageSquare size={18} className="text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">Payment Remarks</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Payment Remarks</p>
                   <p className="text-[14px] text-foreground mt-0.5">{expense.payment_remarks}</p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export default function ExpenseDetail() {
         {/* Notes */}
         {expense.notes && (
           <div className="card p-6">
-            <h3 className="text-[13px] font-medium text-secondary uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h3 className="text-[13px] font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
               <MessageSquare size={16} /> Notes
             </h3>
             <p className="text-[13px] text-foreground bg-muted rounded-lg p-4 whitespace-pre-wrap">{expense.notes}</p>
@@ -175,3 +175,4 @@ export default function ExpenseDetail() {
     </div>
   );
 }
+

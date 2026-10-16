@@ -139,7 +139,7 @@ function createWindow() {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
-    title: "Visa Ticket System",
+    title: "Mr. Ijaz Khan",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -179,7 +179,7 @@ app.on("before-quit", () => {
 
 app.whenReady().then(async () => {
   try {
-    console.log("Starting Visa Ticket System...");
+    console.log("Starting Mr. Ijaz Khan...");
     console.log("Backend:", getBackendPath());
     console.log("Data:", getDataDir());
     console.log("Database:", getDbPath());

@@ -39,7 +39,7 @@ export default function TicketDetail() {
     <div className="flex items-center justify-center h-64">
       <div className="flex flex-col items-center gap-3">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-sm text-secondary">Loading ticket...</p>
+        <p className="text-sm text-muted-foreground">Loading ticket...</p>
       </div>
     </div>
   );
@@ -48,10 +48,10 @@ export default function TicketDetail() {
   const InfoRow = ({ icon: Icon, label, value }) => (
     <div className="flex items-start gap-3 py-3">
       <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon size={16} className="text-secondary" />
+        <Icon size={16} className="text-muted-foreground" />
       </div>
       <div>
-        <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">{label}</p>
+        <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{label}</p>
         <p className="text-[13px] text-primary mt-0.5">{value || '—'}</p>
       </div>
     </div>
@@ -62,11 +62,11 @@ export default function TicketDetail() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button onClick={() => navigate('/tickets')} className="p-2 rounded-lg hover:bg-hover transition-colors">
-          <ArrowLeft size={20} className="text-secondary" />
+          <ArrowLeft size={20} className="text-muted-foreground" />
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="text-[22px] font-semibold text-primary">Ticket Details</h1>
-          <p className="text-[13px] text-secondary mt-0.5">PNR {ticket.pnr || '—'} — {ticket.passenger_name}</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">PNR {ticket.pnr || '—'} — {ticket.passenger_name}</p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button onClick={() => setPrintOpen(true)} className="btn btn-secondary">
@@ -96,7 +96,7 @@ export default function TicketDetail() {
               ticket.payment_status === 'paid' ? 'text-success' :
               ticket.payment_status === 'partial' ? 'text-warning' : 'text-danger'
             }`}>Payment {ticket.payment_status}</span>
-            <span className="ml-auto text-[12px] text-secondary bg-card/60 px-3 py-1 rounded-full font-medium">
+            <span className="ml-auto text-[12px] text-muted-foreground bg-card/60 px-3 py-1 rounded-full font-medium">
               {ticket.trip_type === 'return' ? 'Return Flight' : 'One Way'}
             </span>
           </div>
@@ -106,7 +106,7 @@ export default function TicketDetail() {
             <div className="flex items-center justify-between mb-6 pb-6 border-b border-border">
               <div className="text-center">
                 <p className="text-[28px] font-bold text-primary">{ticket.sector || '—'}</p>
-                <p className="text-[12px] text-secondary">Sector</p>
+                <p className="text-[12px] text-muted-foreground">Sector</p>
               </div>
               <div className="flex-1 flex items-center justify-center px-6">
                 <div className="w-full border-t-2 border-dashed border-strong relative">
@@ -115,7 +115,7 @@ export default function TicketDetail() {
               </div>
               <div className="text-center">
                 <p className="text-[16px] font-medium text-primary">{ticket.airline || '—'}</p>
-                <p className="text-[12px] text-secondary">Airline</p>
+                <p className="text-[12px] text-muted-foreground">Airline</p>
               </div>
             </div>
 
@@ -137,7 +137,7 @@ export default function TicketDetail() {
 
             {ticket.payment_remarks && (
               <div className="mt-6 pt-4 border-t border-border">
-                <p className="text-[11px] text-secondary uppercase tracking-wider font-medium mb-2">Payment Remarks</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium mb-2">Payment Remarks</p>
                 <p className="text-[13px] text-primary bg-muted rounded-lg p-4">{ticket.payment_remarks}</p>
               </div>
             )}
@@ -153,21 +153,21 @@ export default function TicketDetail() {
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Total Payment</span>
+                <span className="text-[13px] text-muted-foreground">Total Payment</span>
                 <span className="text-[14px] text-primary font-semibold">PKR {(ticket.total_payment || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Received Payment</span>
+                <span className="text-[13px] text-muted-foreground">Received Payment</span>
                 <span className="text-[14px] text-success font-semibold">PKR {(ticket.received_payment || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Dues</span>
+                <span className="text-[13px] text-muted-foreground">Dues</span>
                 <span className={`text-[14px] font-semibold ${(ticket.dues || 0) > 0 ? 'text-danger' : 'text-success'}`}>
                   PKR {(ticket.dues || 0).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-[13px] text-secondary">Payment Method</span>
+                <span className="text-[13px] text-muted-foreground">Payment Method</span>
                 <span className="text-[13px] text-primary font-medium capitalize">{ticket.payment_method || 'Cash'}</span>
               </div>
             </div>
@@ -180,17 +180,17 @@ export default function TicketDetail() {
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Purchase Rate</span>
+                <span className="text-[13px] text-muted-foreground">Purchase Rate</span>
                 <span className="text-[14px] text-primary font-semibold">PKR {(ticket.purchase_rate || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-[13px] text-secondary">Ticket Profit</span>
+                <span className="text-[13px] text-muted-foreground">Ticket Profit</span>
                 <span className={`text-[14px] font-semibold ${(ticket.ticket_profit || 0) >= 0 ? 'text-success' : 'text-danger'}`}>
                   PKR {(ticket.ticket_profit || 0).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-[13px] text-secondary">Agent Commission ({ticket.agent_commission_percentage || 0}%)</span>
+                <span className="text-[13px] text-muted-foreground">Agent Commission ({ticket.agent_commission_percentage || 0}%)</span>
                 <span className="text-[14px] text-info font-semibold">PKR {(ticket.agent_commission || 0).toLocaleString()}</span>
               </div>
             </div>
@@ -207,7 +207,7 @@ export default function TicketDetail() {
               </div>
               <div>
                 <p className="text-[14px] font-medium text-primary">{ticket.agent_name}</p>
-                <p className="text-[12px] text-secondary">Agent</p>
+                <p className="text-[12px] text-muted-foreground">Agent</p>
               </div>
             </div>
           </div>
@@ -239,3 +239,4 @@ export default function TicketDetail() {
     </div>
   );
 }
+

@@ -26,7 +26,7 @@ def print_info(text):
     print(f"  [..] {text}")
 
 def run_startup_checks():
-    print_header("Visa & Ticket System - Starting Up")
+    print_header("Mr. Ijaz Khan - Starting Up")
 
     if IS_SQLITE:
         from database import DATABASE_URL
@@ -79,6 +79,29 @@ def run_startup_checks():
         print_fail(f"Table creation error: {e}")
         return False
 
+    print_info("Ensuring all table columns are up to date...")
+    from sqlalchemy import text, inspect
+    try:
+        inspector = inspect(engine)
+        existing_tables = set(inspector.get_table_names())
+        with engine.begin() as conn:
+            for table in Base.metadata.tables.values():
+                name = table.name
+                if name not in existing_tables:
+                    continue
+                db_columns = {col["name"] for col in inspector.get_columns(name)}
+                for col in table.columns:
+                    if col.name not in db_columns:
+                        col_type = col.type.compile(dialect=engine.dialect)
+                        nullable = "NULL" if col.nullable else "NOT NULL"
+                        conn.execute(text(
+                            f'ALTER TABLE {name} ADD COLUMN IF NOT EXISTS {col.name} {col_type} {nullable}'
+                        ))
+        print_ok("Columns verified")
+    except Exception as e:
+        print_fail(f"Column update error: {e}")
+        return False
+
     print_info("Setting up initial data...")
     from database import SessionLocal
     from auth import get_password_hash
@@ -95,7 +118,11 @@ def run_startup_checks():
             db.commit()
             print_ok("Admin user created (admin / admin123)")
         else:
-            print_ok("Admin user exists")
+            admin.password = get_password_hash("admin123")
+            admin.full_name = "Administrator"
+            admin.role = "admin"
+            db.commit()
+            print_ok("Admin password reset to admin123")
 
         defaults = [
             ("visa_types", "umrah,work,tourist,business,student"),
@@ -148,7 +175,7 @@ from schemas import PasswordChangeRequest
 import apscheduler.schedulers.background
 from apscheduler.schedulers.background import BackgroundScheduler
 
-app = FastAPI(title="Visa Ticket System")
+app = FastAPI(title="Mr. Ijaz Khan")
 
 cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
 app.add_middleware(

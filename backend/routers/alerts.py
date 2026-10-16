@@ -54,7 +54,7 @@ def get_pending_payment_alerts(db: Session = Depends(get_db), user=Depends(get_c
     ).all()
 
     for t in tickets:
-        due = t.selling_price - t.payment_received
+        due = t.dues
         if due > 0:
             created = t.created_at or datetime.now()
             days_overdue = (datetime.now() - created).days
@@ -64,15 +64,15 @@ def get_pending_payment_alerts(db: Session = Depends(get_db), user=Depends(get_c
                 "passenger_name": t.passenger_name,
                 "agent_name": agents.get(t.agent_id, ""),
                 "amount_due": due,
-                "selling_price": t.selling_price,
-                "payment_received": t.payment_received,
+                "total_payment": t.total_payment,
+                "payment_received": t.received_payment,
                 "days_overdue": days_overdue,
                 "payment_status": t.payment_status
             })
 
     visas = db.query(VisaProcessing).all()
     for v in visas:
-        due = v.total_charges - v.payment_received
+        due = v.dues
         if due > 0:
             created = v.created_at or datetime.now()
             days_overdue = (datetime.now() - created).days
@@ -82,8 +82,8 @@ def get_pending_payment_alerts(db: Session = Depends(get_db), user=Depends(get_c
                 "passenger_name": v.passenger_name,
                 "agent_name": agents.get(v.agent_id, ""),
                 "amount_due": due,
-                "selling_price": v.total_charges,
-                "payment_received": v.payment_received,
+                "total_charges": v.total_charges,
+                "received": v.received,
                 "days_overdue": days_overdue,
                 "payment_status": v.status
             })

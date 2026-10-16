@@ -10,7 +10,7 @@ load_dotenv()
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from database import Base
-from models import User, Agent, TicketBooking, VisaProcessing, CashOut, Settings
+from models import User, Agent, TicketBooking, VisaProcessing, CashOut, Settings, ActivityLog
 
 config = context.config
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", "postgresql://postgres:mentee@localhost:5432/visa_ticket_system"))

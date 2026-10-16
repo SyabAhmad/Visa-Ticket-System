@@ -1,88 +1,90 @@
 import os
 import shutil
-from datetime import datetime
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+import logging
+from datetime import datetime, timezone
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
+from database import get_db, DATABASE_URL, IS_SQLITE
+from models import Agent, TicketBooking, VisaProcessing, CashOut, Settings, User
 from auth import get_current_user
 
 router = APIRouter(prefix="/api/backup", tags=["backup"])
+logger = logging.getLogger(__name__)
 
-DB_PATH = "visa_system.db"
+BACKUP_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "backups")
 
 
 @router.get("/export")
 def export_database(user=Depends(get_current_user)):
-    if not os.path.exists(DB_PATH):
-        raise HTTPException(status_code=404, detail="Database file not found")
+    try:
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        os.makedirs(BACKUP_DIR, exist_ok=True)
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"visa_backup_{timestamp}.db"
-
-    return FileResponse(
-        path=DB_PATH,
-        filename=filename,
-        media_type="application/octet-stream",
-    )
+        if IS_SQLITE:
+            db_path = DATABASE_URL.replace("sqlite:///", "")
+            if not os.path.isabs(db_path):
+                db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), db_path)
+            if not os.path.exists(db_path):
+                raise HTTPException(status_code=500, detail="SQLite database file not found")
+            backup_file = os.path.join(BACKUP_DIR, f"visa_backup_{timestamp}.db")
+            shutil.copy2(db_path, backup_file)
+            return FileResponse(
+                path=backup_file,
+                filename=f"visa_backup_{timestamp}.db",
+                media_type="application/octet-stream",
+            )
+        else:
+            from urllib.parse import urlparse
+            import subprocess
+            parsed = urlparse(DATABASE_URL)
+            pg = {
+                "host": parsed.hostname or "localhost",
+                "port": str(parsed.port or 5432),
+                "user": parsed.username or "postgres",
+                "dbname": parsed.path.lstrip("/") or "visa_ticket_system",
+                "password": parsed.password or "",
+            }
+            backup_file = os.path.join(BACKUP_DIR, f"visa_backup_{timestamp}.sql")
+            env = os.environ.copy()
+            env["PGPASSWORD"] = pg["password"]
+            subprocess.run([
+                "pg_dump", "-h", pg["host"], "-p", pg["port"],
+                "-U", pg["user"], "-d", pg["dbname"], "-f", backup_file,
+            ], env=env, check=True, capture_output=True)
+            return FileResponse(
+                path=backup_file,
+                filename=f"visa_backup_{timestamp}.sql",
+                media_type="application/octet-stream",
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Backup failed: {str(e)}")
 
 
 @router.post("/import")
-def import_database(file: UploadFile = File(...), user=Depends(get_current_user)):
-    if not file.filename.endswith(".db"):
-        raise HTTPException(status_code=400, detail="Only .db files are allowed")
-
-    backup_path = f"{DB_PATH}.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-
-    if os.path.exists(DB_PATH):
-        shutil.copy2(DB_PATH, backup_path)
-
-    try:
-        with open(DB_PATH, "wb") as f:
-            content = file.file.read()
-            f.write(content)
-
-        file_size = os.path.getsize(DB_PATH)
-        if file_size < 100:
-            raise Exception("File too small, likely corrupt")
-
-        from database import engine
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            conn.execute(text("SELECT count(*) FROM users"))
-
-        return {
-            "detail": "Database imported successfully",
-            "old_backup": backup_path,
-            "size": file_size,
-        }
-    except Exception as e:
-        if os.path.exists(backup_path):
-            shutil.copy2(backup_path, DB_PATH)
-        raise HTTPException(status_code=400, detail=f"Import failed: {str(e)}")
+def import_database(file_path: str = "", user=Depends(get_current_user)):
+    raise HTTPException(status_code=400, detail="Import not supported. Restore from backup file manually.")
 
 
 @router.get("/stats")
-def backup_stats(user=Depends(get_current_user)):
-    from database import get_db
-    from models import Agent, TicketBooking, VisaProcessing, CashOut, Settings, User
-    db = next(get_db())
-
-    db_size = os.path.getsize(DB_PATH) if os.path.exists(DB_PATH) else 0
-
+def backup_stats(db: Session = Depends(get_db), user=Depends(get_current_user)):
     backups = []
-    for f in os.listdir("."):
-        if f.startswith("visa_system.db.backup_"):
-            fsize = os.path.getsize(f)
-            ftime = os.path.getmtime(f)
-            backups.append({
-                "filename": f,
-                "size": fsize,
-                "date": datetime.fromtimestamp(ftime).isoformat(),
-            })
-    backups.sort(key=lambda x: x["date"], reverse=True)
+    if os.path.exists(BACKUP_DIR):
+        for f in sorted(os.listdir(BACKUP_DIR), reverse=True):
+            if f.endswith(('.sql', '.db')):
+                fpath = os.path.join(BACKUP_DIR, f)
+                fsize = os.path.getsize(fpath)
+                ftime = os.path.getmtime(fpath)
+                backups.append({
+                    "filename": f,
+                    "size": fsize,
+                    "size_formatted": f"{fsize / 1024:.1f} KB" if fsize < 1024*1024 else f"{fsize / (1024*1024):.1f} MB",
+                    "date": datetime.fromtimestamp(ftime).isoformat(),
+                })
 
     return {
-        "db_size": db_size,
-        "db_size_formatted": f"{db_size / 1024:.1f} KB" if db_size < 1024*1024 else f"{db_size / (1024*1024):.1f} MB",
         "records": {
             "users": db.query(User).count(),
             "agents": db.query(Agent).count(),
@@ -91,5 +93,5 @@ def backup_stats(user=Depends(get_current_user)):
             "cashouts": db.query(CashOut).count(),
             "settings": db.query(Settings).count(),
         },
-        "backups": backups,
+        "backups": backups[:10],
     }

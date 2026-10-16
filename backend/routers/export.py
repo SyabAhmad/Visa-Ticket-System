@@ -14,18 +14,18 @@ def tickets_to_csv(tickets):
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow([
-        'ID', 'Agent', 'Passenger', 'Phone', 'Passport', 'Passport Expiry',
-        'Airline', 'From', 'To', 'Booking Ref', 'Departure', 'Return',
-        'Ticket Price', 'Selling Price', 'Commission', 'Payment Received',
-        'Payment Status', 'Notes', 'Created At'
+        'ID', 'Agent', 'PNR', 'Passenger', 'Contact', 'DOB', 'Passport', 'Passport Expiry',
+        'Airline', 'Sector', 'Trip Type', 'Departure', 'Return',
+        'Total Payment', 'Received Payment', 'Dues', 'Purchase Rate',
+        'Ticket Profit', 'Agent Commission', 'Payment Status', 'Remarks', 'Created At'
     ])
     for t in tickets:
         writer.writerow([
-            t.id, t.agent_name, t.passenger_name, t.phone, t.passport_number,
-            t.passport_expiry, t.airline, t.flight_from, t.flight_to,
-            t.booking_ref, t.departure_date, t.return_date,
-            t.ticket_price, t.selling_price, t.commission, t.payment_received,
-            t.payment_status, t.notes, t.created_at.strftime('%Y-%m-%d %H:%M') if t.created_at else ''
+            t.id, t.agent_name, t.pnr_number, t.passenger_name, t.contact_number, t.dob, t.passport_number,
+            t.passport_expiry, t.airline, t.sector, t.trip_type, t.departure_date, t.return_date,
+            t.total_payment, t.received_payment, t.dues, t.purchase_rate,
+            t.ticket_profit, t.agent_commission, t.payment_status, t.payment_remarks,
+            t.created_at.strftime('%Y-%m-%d %H:%M') if t.created_at else ''
         ])
     output.seek(0)
     return output
@@ -35,18 +35,20 @@ def visas_to_csv(visas):
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow([
-        'ID', 'Agent', 'Passenger', 'Phone', 'Passport', 'Occupation',
-        'Visa Type', 'Package', 'Total Charges', 'Package Price', 'Commission',
-        'Payment Received', 'Payment Type', 'Cash', 'Bank', 'Expenses',
-        'Analysis', 'Status', 'Created At'
+        'ID', 'Agent', 'Passenger', 'Contact', 'Passport', 'DOB', 'Passport Expiry',
+        'Visa Type', 'Visa Number', 'Sponsor Number', 'Occupation',
+        'Visa Process Charges', 'Medical Token Charges', 'Agreement Paper Charges',
+        'Extra Charges', 'Total Charges', 'Received', 'Dues',
+        'Purchase Rate', 'Commission', 'Status', 'Created At'
     ])
     for v in visas:
         writer.writerow([
-            v.id, v.agent_name, v.passenger_name, v.phone, v.passport_number,
-            v.occupation, v.visa_type, v.package, v.total_charges,
-            v.package_price, v.total_commission, v.payment_received,
-            v.payment_type, v.payment_cash, v.payment_bank, v.total_expenses,
-            v.analysis, v.status, v.created_at.strftime('%Y-%m-%d %H:%M') if v.created_at else ''
+            v.id, v.agent_name, v.passenger_name, v.contact_number, v.passport_number,
+            v.dob, v.passport_expiry, v.visa_type, v.visa_number, v.sponsor_number,
+            v.occupation, v.visa_process_charges, v.medical_token_charges,
+            v.agreement_paper_charges, v.extra_charges, v.total_charges,
+            v.received, v.dues, v.purchase_rate, v.commission,
+            v.status, v.created_at.strftime('%Y-%m-%d %H:%M') if v.created_at else ''
         ])
     output.seek(0)
     return output

@@ -118,42 +118,45 @@ export default function Settings() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E74C3C]"></div>
+      <div className="flex flex-col items-center gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-sm text-secondary">Loading settings...</p>
+      </div>
     </div>
   );
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-[22px] font-normal text-[#202124] mb-1">Settings</h1>
-      <p className="text-[13px] text-[#5f6368] mb-6">Manage dropdown values and system data</p>
+      <h1 className="text-[22px] font-semibold text-primary mb-1">Settings</h1>
+      <p className="text-[13px] text-secondary mb-6">Manage dropdown values and system data</p>
 
       {/* Password Change Section */}
-      <div className="bg-white rounded-xl border border-[#e0e0e0] overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-[#e0e0e0] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#f0f0f0] flex items-center justify-center">
-            <Lock size={18} className="text-[#E74C3C]" />
+      <div className="card overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+            <Lock size={18} className="text-primary" />
           </div>
           <div>
-            <h3 className="text-[15px] font-medium text-[#202124]">Change Password</h3>
-            <p className="text-[12px] text-[#5f6368]">Update your account password</p>
+            <h3 className="text-[15px] font-semibold text-primary">Change Password</h3>
+            <p className="text-[12px] text-secondary">Update your account password</p>
           </div>
         </div>
         <form onSubmit={handleChangePassword} className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">Current Password</label>
-              <input type="password" value={passwords.current_password} onChange={e => setPasswords({...passwords, current_password: e.target.value})} required className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:border-[#E74C3C] focus:ring-0 outline-none" />
+              <label className="label">Current Password</label>
+              <input type="password" value={passwords.current_password} onChange={e => setPasswords({...passwords, current_password: e.target.value})} required className="input" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">New Password</label>
-              <input type="password" value={passwords.new_password} onChange={e => setPasswords({...passwords, new_password: e.target.value})} required minLength={6} className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:border-[#E74C3C] focus:ring-0 outline-none" />
+              <label className="label">New Password</label>
+              <input type="password" value={passwords.new_password} onChange={e => setPasswords({...passwords, new_password: e.target.value})} required minLength={6} className="input" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-[#5f6368] mb-1.5 uppercase tracking-wider">Confirm New Password</label>
-              <input type="password" value={passwords.confirm_password} onChange={e => setPasswords({...passwords, confirm_password: e.target.value})} required minLength={6} className="w-full px-3 py-2.5 border border-[#dadce0] rounded-lg text-[13px] focus:border-[#E74C3C] focus:ring-0 outline-none" />
+              <label className="label">Confirm New Password</label>
+              <input type="password" value={passwords.confirm_password} onChange={e => setPasswords({...passwords, confirm_password: e.target.value})} required minLength={6} className="input" />
             </div>
           </div>
-          <button type="submit" disabled={changingPassword} className="flex items-center gap-2 bg-[#E74C3C] text-white px-5 py-2.5 rounded-full text-[13px] font-medium hover:bg-[#C0392B] transition-all disabled:opacity-50">
+          <button type="submit" disabled={changingPassword} className="btn btn-primary disabled:opacity-50">
             {changingPassword ? <RefreshCw size={16} className="animate-spin" /> : <Lock size={16} />}
             {changingPassword ? 'Changing...' : 'Change Password'}
           </button>
@@ -161,59 +164,56 @@ export default function Settings() {
       </div>
 
       {/* Backup Section */}
-      <div className="bg-white rounded-xl border border-[#e0e0e0] overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-[#e0e0e0] flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#f0f0f0] flex items-center justify-center">
-              <Server size={18} className="text-[#E74C3C]" />
+      <div className="card overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+            <Server size={18} className="text-primary" />
           </div>
           <div>
-            <h3 className="text-[15px] font-medium text-[#202124]">Data Backup</h3>
-            <p className="text-[12px] text-[#5f6368]">Export or import your database</p>
+            <h3 className="text-[15px] font-semibold text-primary">Data Backup</h3>
+            <p className="text-[12px] text-secondary">Export or import your database</p>
           </div>
         </div>
 
         <div className="p-6">
-          {/* Stats */}
           {backupStats && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-[#f8f9fa] rounded-lg p-3 text-center">
-                <p className="text-[11px] text-[#5f6368] uppercase tracking-wider">DB Size</p>
-                <p className="text-[16px] font-medium text-[#202124]">{backupStats.db_size_formatted}</p>
+              <div className="bg-muted rounded-lg p-3 text-center">
+                <p className="text-[11px] text-secondary uppercase tracking-wider">DB Size</p>
+                <p className="text-[16px] font-semibold text-primary">{backupStats.db_size_formatted}</p>
               </div>
               {Object.entries(backupStats.records).slice(0, 3).map(([key, val]) => (
-                <div key={key} className="bg-[#f8f9fa] rounded-lg p-3 text-center">
-                  <p className="text-[11px] text-[#5f6368] uppercase tracking-wider">{key}</p>
-                  <p className="text-[16px] font-medium text-[#202124]">{val}</p>
+                <div key={key} className="bg-muted rounded-lg p-3 text-center">
+                  <p className="text-[11px] text-secondary uppercase tracking-wider">{key}</p>
+                  <p className="text-[16px] font-semibold text-primary">{val}</p>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex flex-wrap gap-3">
-            <button onClick={handleExport} className="flex items-center gap-2 px-5 py-2.5 bg-[#E74C3C] text-white rounded-full text-[13px] font-medium hover:bg-[#C0392B] transition-all">
+            <button onClick={handleExport} className="btn btn-primary">
               <Download size={16} /> Export Database
             </button>
-            <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="flex items-center gap-2 px-5 py-2.5 border border-[#dadce0] rounded-full text-[13px] font-medium text-[#5f6368] hover:bg-[#f1f3f4] transition-colors disabled:opacity-50">
+            <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="btn btn-secondary disabled:opacity-50">
               {importing ? <RefreshCw size={16} className="animate-spin" /> : <Upload size={16} />}
               {importing ? 'Importing...' : 'Import Database'}
             </button>
             <input ref={fileInputRef} type="file" accept=".db" onChange={handleImport} className="hidden" />
           </div>
 
-          {/* Previous Backups */}
           {backupStats?.backups?.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-[#e0e0e0]">
-              <h4 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-3">Previous Backups</h4>
+            <div className="mt-6 pt-4 border-t border-border">
+              <h4 className="text-[13px] font-semibold text-secondary uppercase tracking-wider mb-3">Previous Backups</h4>
               <div className="space-y-2">
                 {backupStats.backups.slice(0, 5).map((b, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-[#f8f9fa] rounded-lg">
-                    <Clock size={16} className="text-[#5f6368]" />
-                    <div className="flex-1">
-                      <p className="text-[12px] text-[#202124]">{b.filename}</p>
-                      <p className="text-[11px] text-[#5f6368]">{new Date(b.date).toLocaleString()}</p>
+                  <div key={i} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                    <Clock size={16} className="text-secondary" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] text-primary">{b.filename}</p>
+                      <p className="text-[11px] text-tertiary">{new Date(b.date).toLocaleString()}</p>
                     </div>
-                    <span className="text-[11px] text-[#5f6368]">{(b.size / 1024).toFixed(1)} KB</span>
+                    <span className="text-[11px] text-tertiary">{(b.size / 1024).toFixed(1)} KB</span>
                   </div>
                 ))}
               </div>
@@ -225,30 +225,30 @@ export default function Settings() {
       {/* Dropdown Settings */}
       <div className="space-y-4">
         {settingConfigs.map(({ key, label, description }) => (
-          <div key={key} className="bg-white rounded-xl border border-[#e0e0e0] p-6">
+          <div key={key} className="card p-6">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="text-[15px] font-medium text-[#202124]">{label}</h3>
-                <p className="text-[12px] text-[#5f6368]">{description}</p>
+                <h3 className="text-[15px] font-semibold text-primary">{label}</h3>
+                <p className="text-[12px] text-secondary">{description}</p>
               </div>
-              <button onClick={() => handleSave(key)} className="flex items-center gap-2 bg-[#E74C3C] text-white px-4 py-2 rounded-full text-[12px] font-medium hover:bg-[#C0392B] transition-colors">
+              <button onClick={() => handleSave(key)} className="btn btn-primary">
                 <Save size={14} /> Save
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
               {(settings[key] || '').split(',').filter(s => s.trim()).map((item, i) => (
-                <div key={i} className="flex items-center gap-1 bg-[#f1f3f4] rounded-full px-3 py-1.5">
+                <div key={i} className="flex items-center gap-1 bg-muted rounded-full px-3 py-1.5">
                   <input
                     value={item.trim()}
                     onChange={(e) => updateList(key, i, e.target.value)}
-                    className="bg-transparent text-[13px] text-[#202124] outline-none w-28"
+                    className="bg-transparent text-[13px] text-primary outline-none w-28"
                   />
-                  <button onClick={() => removeListItem(key, i)} className="text-[#9aa0a6] hover:text-[#d93025] p-0.5">
+                  <button onClick={() => removeListItem(key, i)} className="text-tertiary hover:text-danger p-0.5">
                     <X size={14} />
                   </button>
                 </div>
               ))}
-              <button onClick={() => addListItem(key)} className="flex items-center gap-1 border border-dashed border-[#dadce0] rounded-full px-3 py-1.5 text-[13px] text-[#5f6368] hover:border-[#E74C3C] hover:text-[#E74C3C] transition-colors">
+              <button onClick={() => addListItem(key)} className="flex items-center gap-1 border border-dashed border-strong rounded-full px-3 py-1.5 text-[13px] text-secondary hover:border-primary hover:text-primary transition-colors">
                 <Plus size={14} /> Add
               </button>
             </div>

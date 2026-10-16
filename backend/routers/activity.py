@@ -17,7 +17,7 @@ def log_activity(db, user, action, entity_type, entity_id, details=""):
         details=details,
     )
     db.add(log)
-    db.commit()
+    db.flush()
 
 
 @router.get("/")

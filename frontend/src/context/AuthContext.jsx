@@ -23,8 +23,15 @@ export function AuthProvider({ children }) {
     const res = await api.post('/auth/login', { username, password });
     localStorage.setItem('token', res.data.access_token);
     localStorage.setItem('refreshToken', res.data.refresh_token);
-    const me = await api.get('/auth/me');
-    setUser(me.data);
+    try {
+      const me = await api.get('/auth/me');
+      setUser(me.data);
+    } catch (err) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      setUser(null);
+      throw err;
+    }
   };
 
   const logout = () => {

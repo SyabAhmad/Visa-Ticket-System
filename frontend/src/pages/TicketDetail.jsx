@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import PrintSlip, { SlipRow, SlipSection } from '../components/PrintSlip';
 import {
   ArrowLeft, Edit2, Trash2, Plane, Calendar, CreditCard,
-  User, Phone, Globe, FileText, Clock, CheckCircle, AlertCircle, Printer,
+  User, Phone, Globe, FileText, Clock, CheckCircle, AlertCircle, Printer, Hash,
 } from 'lucide-react';
 
 export default function TicketDetail() {
@@ -16,54 +16,66 @@ export default function TicketDetail() {
   const [printOpen, setPrintOpen] = useState(false);
 
   useEffect(() => {
-    api.get(`/tickets/${id}`).then(res => { setTicket(res.data); setLoading(false); }).catch(() => { toast.error('Ticket not found'); navigate('/tickets'); });
-  }, [id]);
+    let active = true;
+    api.get(`/tickets/${id}`)
+      .then(res => { if (active) setTicket(res.data); })
+      .catch(() => { if (active) { toast.error('Ticket not found'); navigate('/tickets'); } })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [id, navigate]);
 
   const handleDelete = async () => {
     if (!confirm('Delete this ticket permanently?')) return;
-    await api.delete(`/tickets/${id}`);
-    toast.success('Ticket deleted');
-    navigate('/tickets');
+    try {
+      await api.delete(`/tickets/${id}`);
+      toast.success('Ticket deleted');
+      navigate('/tickets');
+    } catch (err) {
+      toast.error('Error deleting ticket');
+    }
   };
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E74C3C]"></div>
+      <div className="flex flex-col items-center gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-sm text-secondary">Loading ticket...</p>
+      </div>
     </div>
   );
   if (!ticket) return null;
 
-  const InfoRow = ({ icon: Icon, label, value, color = '#5f6368' }) => (
+  const InfoRow = ({ icon: Icon, label, value }) => (
     <div className="flex items-start gap-3 py-3">
-      <div className="w-9 h-9 rounded-full bg-[#f1f3f4] flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon size={18} style={{ color }} />
+      <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon size={16} className="text-secondary" />
       </div>
       <div>
-        <p className="text-[11px] text-[#5f6368] uppercase tracking-wider font-medium">{label}</p>
-        <p className="text-[14px] text-[#202124] mt-0.5">{value || '—'}</p>
+        <p className="text-[11px] text-secondary uppercase tracking-wider font-medium">{label}</p>
+        <p className="text-[13px] text-primary mt-0.5">{value || '—'}</p>
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate('/tickets')} className="p-2 rounded-full hover:bg-[#f1f3f4] transition-colors">
-          <ArrowLeft size={22} className="text-[#5f6368]" />
+        <button onClick={() => navigate('/tickets')} className="p-2 rounded-lg hover:bg-hover transition-colors">
+          <ArrowLeft size={20} className="text-secondary" />
         </button>
-        <div className="flex-1">
-          <h1 className="text-[22px] font-normal text-[#202124]">Ticket Details</h1>
-          <p className="text-[13px] text-[#5f6368]">Booking #{ticket.booking_ref || ticket.id}</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[22px] font-semibold text-primary">Ticket Details</h1>
+          <p className="text-[13px] text-secondary mt-0.5">PNR {ticket.pnr || '—'} — {ticket.passenger_name}</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setPrintOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#d4d4d4] text-[13px] font-medium text-[#4A4A4A] hover:bg-[#f0f0f0] transition-colors">
+        <div className="flex gap-2 flex-shrink-0">
+          <button onClick={() => setPrintOpen(true)} className="btn btn-secondary">
             <Printer size={16} /> Print Slip
           </button>
-          <button onClick={() => navigate('/tickets', { state: { editId: ticket.id } })} className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#d4d4d4] text-[13px] font-medium text-[#4A4A4A] hover:bg-[#f0f0f0] transition-colors">
+          <button onClick={() => navigate('/tickets', { state: { editId: ticket.id } })} className="btn btn-secondary">
             <Edit2 size={16} /> Edit
           </button>
-          <button onClick={handleDelete} className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#fce8e6] text-[13px] font-medium text-[#d93025] hover:bg-[#fce8e6] transition-colors">
+          <button onClick={handleDelete} className="btn btn-danger">
             <Trash2 size={16} /> Delete
           </button>
         </div>
@@ -71,55 +83,62 @@ export default function TicketDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Info Card */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-[#e0e0e0] overflow-hidden">
+        <div className="lg:col-span-2 card overflow-hidden">
           {/* Status Banner */}
           <div className={`px-6 py-4 flex items-center gap-3 ${
-            ticket.payment_status === 'paid' ? 'bg-[#e6f4ea]' :
-            ticket.payment_status === 'partial' ? 'bg-[#fef7e0]' : 'bg-[#fce8e6]'
+            ticket.payment_status === 'paid' ? 'bg-success-light' :
+            ticket.payment_status === 'partial' ? 'bg-warning-light' : 'bg-danger-light'
           }`}>
-            {ticket.payment_status === 'paid' ? <CheckCircle size={20} className="text-[#1e8e3e]" /> :
-             ticket.payment_status === 'partial' ? <Clock size={20} className="text-[#e37400]" /> :
-             <AlertCircle size={20} className="text-[#d93025]" />}
+            {ticket.payment_status === 'paid' ? <CheckCircle size={20} className="text-success" /> :
+             ticket.payment_status === 'partial' ? <Clock size={20} className="text-warning" /> :
+             <AlertCircle size={20} className="text-danger" />}
             <span className={`text-[14px] font-medium capitalize ${
-              ticket.payment_status === 'paid' ? 'text-[#1e8e3e]' :
-              ticket.payment_status === 'partial' ? 'text-[#e37400]' : 'text-[#d93025]'
+              ticket.payment_status === 'paid' ? 'text-success' :
+              ticket.payment_status === 'partial' ? 'text-warning' : 'text-danger'
             }`}>Payment {ticket.payment_status}</span>
+            <span className="ml-auto text-[12px] text-secondary bg-card/60 px-3 py-1 rounded-full font-medium">
+              {ticket.trip_type === 'return' ? 'Return Flight' : 'One Way'}
+            </span>
           </div>
 
           <div className="p-6">
             {/* Route Header */}
-            <div className="flex items-center justify-between mb-6 pb-6 border-b border-[#f0f0f0]">
+            <div className="flex items-center justify-between mb-6 pb-6 border-b border-border">
               <div className="text-center">
-                <p className="text-[28px] font-normal text-[#202124]">{ticket.flight_from}</p>
-                <p className="text-[12px] text-[#5f6368]">From</p>
+                <p className="text-[28px] font-bold text-primary">{ticket.sector || '—'}</p>
+                <p className="text-[12px] text-secondary">Sector</p>
               </div>
               <div className="flex-1 flex items-center justify-center px-6">
-                <div className="w-full border-t-2 border-dashed border-[#dadce0] relative">
-                  <Plane size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#E74C3C] bg-white px-2" />
+                <div className="w-full border-t-2 border-dashed border-strong relative">
+                  <Plane size={24} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary bg-card px-2" />
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-[28px] font-normal text-[#202124]">{ticket.flight_to}</p>
-                <p className="text-[12px] text-[#5f6368]">To</p>
+                <p className="text-[16px] font-medium text-primary">{ticket.airline || '—'}</p>
+                <p className="text-[12px] text-secondary">Airline</p>
               </div>
             </div>
 
             {/* Details Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
-              <InfoRow icon={User} label="Passenger" value={ticket.passenger_name} color="#202124" />
-              <InfoRow icon={Globe} label="Airline" value={ticket.airline} color="#E74C3C" />
-              <InfoRow icon={FileText} label="Passport" value={ticket.passport_number} />
+              <InfoRow icon={Hash} label="PNR Number" value={ticket.pnr} />
+              <InfoRow icon={User} label="Passenger" value={ticket.passenger_name} />
+              <InfoRow icon={Phone} label="Contact Number" value={ticket.contact_number} />
+              <InfoRow icon={Calendar} label="Date of Birth" value={ticket.dob} />
+              <InfoRow icon={FileText} label="Passport Number" value={ticket.passport_number} />
               <InfoRow icon={Calendar} label="Passport Expiry" value={ticket.passport_expiry} />
-              <InfoRow icon={Phone} label="Phone" value={ticket.phone} />
-              <InfoRow icon={FileText} label="Booking Reference" value={ticket.booking_ref} />
-              <InfoRow icon={Calendar} label="Departure" value={ticket.departure_date} color="#E74C3C" />
-              <InfoRow icon={Calendar} label="Return" value={ticket.return_date} />
+              <InfoRow icon={Globe} label="Sector" value={ticket.sector} />
+              <InfoRow icon={Globe} label="Airline" value={ticket.airline} />
+              <InfoRow icon={Calendar} label="Departure" value={ticket.departure_date} />
+              {ticket.trip_type === 'return' && (
+                <InfoRow icon={Calendar} label="Return / Arrival" value={ticket.return_date} />
+              )}
             </div>
 
-            {ticket.notes && (
-              <div className="mt-6 pt-4 border-t border-[#f0f0f0]">
-                <p className="text-[11px] text-[#5f6368] uppercase tracking-wider font-medium mb-2">Notes</p>
-                <p className="text-[13px] text-[#202124] bg-[#f8f9fa] rounded-lg p-4">{ticket.notes}</p>
+            {ticket.payment_remarks && (
+              <div className="mt-6 pt-4 border-t border-border">
+                <p className="text-[11px] text-secondary uppercase tracking-wider font-medium mb-2">Payment Remarks</p>
+                <p className="text-[13px] text-primary bg-muted rounded-lg p-4">{ticket.payment_remarks}</p>
               </div>
             )}
           </div>
@@ -127,49 +146,68 @@ export default function TicketDetail() {
 
         {/* Financial Sidebar */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-6">
-            <h3 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-4">Financial Summary</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Agency Cost</span>
-                <span className="text-[14px] text-[#202124] font-medium">SAR {ticket.ticket_price.toLocaleString()}</span>
+          <div className="card p-6">
+            <div className="section-header">
+              <CreditCard size={16} className="text-primary" />
+              <h3>Financial Summary</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Total Payment</span>
+                <span className="text-[14px] text-primary font-semibold">PKR {(ticket.total_payment || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Selling Price</span>
-                <span className="text-[14px] text-[#202124] font-medium">SAR {ticket.selling_price.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Received Payment</span>
+                <span className="text-[14px] text-success font-semibold">PKR {(ticket.received_payment || 0).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-[13px] text-[#5f6368]">Commission</span>
-                <span className="text-[14px] text-[#1e8e3e] font-medium">SAR {ticket.commission.toLocaleString()}</span>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Dues</span>
+                <span className={`text-[14px] font-semibold ${(ticket.dues || 0) > 0 ? 'text-danger' : 'text-success'}`}>
+                  PKR {(ticket.dues || 0).toLocaleString()}
+                </span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-[13px] text-[#5f6368]">Payment Received</span>
-                <span className="text-[14px] text-[#E74C3C] font-medium">SAR {ticket.payment_received.toLocaleString()}</span>
+                <span className="text-[13px] text-secondary">Payment Method</span>
+                <span className="text-[13px] text-primary font-medium capitalize">{ticket.payment_method || 'Cash'}</span>
               </div>
             </div>
-            {ticket.selling_price > 0 && (
-              <div className="mt-4 pt-4 border-t border-[#e0e0e0]">
-                <div className="flex justify-between items-center">
-                  <span className="text-[13px] font-medium text-[#202124]">Balance</span>
-                  <span className={`text-[16px] font-medium ${
-                    (ticket.selling_price - ticket.payment_received) > 0 ? 'text-[#d93025]' : 'text-[#1e8e3e]'
-                  }`}>
-                    SAR {(ticket.selling_price - ticket.payment_received).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
 
-          <div className="bg-white rounded-xl border border-[#e0e0e0] p-6">
-            <h3 className="text-[13px] font-medium text-[#5f6368] uppercase tracking-wider mb-3">Agent</h3>
+          <div className="card p-6">
+            <div className="section-header">
+              <FileText size={16} className="text-primary" />
+              <h3>Cost & Profit</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Purchase Rate</span>
+                <span className="text-[14px] text-primary font-semibold">PKR {(ticket.purchase_rate || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-border">
+                <span className="text-[13px] text-secondary">Ticket Profit</span>
+                <span className={`text-[14px] font-semibold ${(ticket.ticket_profit || 0) >= 0 ? 'text-success' : 'text-danger'}`}>
+                  PKR {(ticket.ticket_profit || 0).toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-[13px] text-secondary">Agent Commission ({ticket.agent_commission_percentage || 0}%)</span>
+                <span className="text-[14px] text-info font-semibold">PKR {(ticket.agent_commission || 0).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="card p-6">
+            <div className="section-header">
+              <User size={16} className="text-primary" />
+              <h3>Agent</h3>
+            </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#E74C3C] to-[#C0392B] flex items-center justify-center text-white font-medium text-sm">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
                 {ticket.agent_name?.charAt(0)}
               </div>
               <div>
-                <p className="text-[14px] font-medium text-[#202124]">{ticket.agent_name}</p>
-                <p className="text-[12px] text-[#5f6368]">Agent</p>
+                <p className="text-[14px] font-medium text-primary">{ticket.agent_name}</p>
+                <p className="text-[12px] text-secondary">Agent</p>
               </div>
             </div>
           </div>
@@ -177,24 +215,26 @@ export default function TicketDetail() {
       </div>
 
       <PrintSlip isOpen={printOpen} onClose={() => setPrintOpen(false)} title="TICKET BOOKING SLIP">
-        <SlipRow label="Booking Ref" value={ticket.booking_ref} bold />
+        <SlipRow label="PNR" value={ticket.pnr} bold />
         <SlipRow label="Passenger" value={ticket.passenger_name} bold />
+        <SlipRow label="Contact" value={ticket.contact_number} />
         <SlipRow label="Passport" value={ticket.passport_number} />
-        <SlipRow label="Phone" value={ticket.phone} />
         <SlipSection title="Flight Details" />
         <SlipRow label="Airline" value={ticket.airline} />
-        <SlipRow label="From" value={ticket.flight_from} />
-        <SlipRow label="To" value={ticket.flight_to} />
+        <SlipRow label="Sector" value={ticket.sector} />
+        <SlipRow label="Trip Type" value={ticket.trip_type === 'return' ? 'Return' : 'One Way'} />
         <SlipRow label="Departure" value={ticket.departure_date} />
-        <SlipRow label="Return" value={ticket.return_date} />
+        {ticket.trip_type === 'return' && <SlipRow label="Return" value={ticket.return_date} />}
         <SlipSection title="Payment" />
-        <SlipRow label="Ticket Price" value={`SAR ${ticket.ticket_price.toLocaleString()}`} />
-        <SlipRow label="Selling Price" value={`SAR ${ticket.selling_price.toLocaleString()}`} bold />
-        <SlipRow label="Commission" value={`SAR ${ticket.commission.toLocaleString()}`} />
-        <SlipRow label="Payment Received" value={`SAR ${ticket.payment_received.toLocaleString()}`} />
-        <SlipRow label="Balance" value={`SAR ${(ticket.selling_price - ticket.payment_received).toLocaleString()}`} bold />
-        <SlipRow label="Payment Status" value={ticket.payment_status.toUpperCase()} bold />
+        <SlipRow label="Total Payment" value={`PKR ${(ticket.total_payment || 0).toLocaleString()}`} bold />
+        <SlipRow label="Received" value={`PKR ${(ticket.received_payment || 0).toLocaleString()}`} />
+        <SlipRow label="Dues" value={`PKR ${(ticket.dues || 0).toLocaleString()}`} bold />
+        <SlipRow label="Purchase Rate" value={`PKR ${(ticket.purchase_rate || 0).toLocaleString()}`} />
+        <SlipRow label="Ticket Profit" value={`PKR ${(ticket.ticket_profit || 0).toLocaleString()}`} bold />
+        <SlipRow label="Agent Commission" value={`PKR ${(ticket.agent_commission || 0).toLocaleString()}`} bold />
+        <SlipRow label="Payment Status" value={(ticket.payment_status || '').toUpperCase()} bold />
         <SlipRow label="Agent" value={ticket.agent_name} />
+        {ticket.payment_remarks && <SlipRow label="Remarks" value={ticket.payment_remarks} />}
       </PrintSlip>
     </div>
   );

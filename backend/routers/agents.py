@@ -18,9 +18,10 @@ def list_agents(db: Session = Depends(get_db), user=Depends(get_current_user)):
 def create_agent(agent: AgentCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
     db_agent = Agent(**agent.model_dump())
     db.add(db_agent)
+    db.flush()
+    log_activity(db, user, "create", "agent", db_agent.id, f"Name: {db_agent.name}")
     db.commit()
     db.refresh(db_agent)
-    log_activity(db, user, "create", "agent", db_agent.id, f"Name: {db_agent.name}")
     return db_agent
 
 
@@ -39,9 +40,9 @@ def update_agent(agent_id: int, update: AgentUpdate, db: Session = Depends(get_d
         raise HTTPException(status_code=404, detail="Agent not found")
     for key, value in update.model_dump(exclude_unset=True).items():
         setattr(agent, key, value)
+    log_activity(db, user, "update", "agent", agent.id, f"Name: {agent.name}")
     db.commit()
     db.refresh(agent)
-    log_activity(db, user, "update", "agent", agent.id, f"Name: {agent.name}")
     return agent
 
 
@@ -52,6 +53,6 @@ def delete_agent(agent_id: int, db: Session = Depends(get_db), user=Depends(get_
         raise HTTPException(status_code=404, detail="Agent not found")
     name = agent.name
     db.delete(agent)
-    db.commit()
     log_activity(db, user, "delete", "agent", agent_id, f"Name: {name}")
+    db.commit()
     return {"detail": "Agent deleted"}

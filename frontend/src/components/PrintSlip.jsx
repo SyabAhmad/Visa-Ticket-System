@@ -5,6 +5,7 @@ export default function PrintSlip({ isOpen, onClose, title, children }) {
 
   const handlePrint = () => {
     const printContent = document.getElementById('print-slip-content');
+    const sanitizedHTML = printContent.innerText;
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
       <!DOCTYPE html>

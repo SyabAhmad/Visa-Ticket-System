@@ -2,6 +2,8 @@
 node_modules/
 __pycache__/
 *.pyc
+venv/
+.venv/
 
 # Environment
 .env
@@ -9,6 +11,8 @@ __pycache__/
 
 # Database
 *.db
+*.db-wal
+*.db-shm
 *.db.backup_*
 backups/
 
@@ -24,6 +28,20 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+release/
 
 # Vite
 frontend/.vite/
+
+# Desktop build artifacts
+desktop_build/
+distribute/
+electron/node_modules/
+electron/release/
+
+# Installer artifacts
+*.exe
+*.zip
+test_api.py
+backend.zip
+backend/static/
